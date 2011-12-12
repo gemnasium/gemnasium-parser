@@ -7,9 +7,11 @@ module Gemnasium
     extend Configuration
 
     def self.gemfile(content)
+      Gemnasium::Parser::Gemfile.new(content)
     end
 
     def self.gemspec(content)
+      Gemnasium::Parser::Gemspec.new(content)
     end
   end
 end
