@@ -14,5 +14,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Gemnasium::Parser::VERSION
 
+  gem.add_development_dependency "rake", ">= 0.8.7"
   gem.add_development_dependency "rspec", "~> 2.7"
 end
