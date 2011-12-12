@@ -13,4 +13,6 @@ Gem::Specification.new do |gem|
   gem.name          = "gemnasium-parser"
   gem.require_paths = ["lib"]
   gem.version       = Gemnasium::Parser::VERSION
+
+  gem.add_development_dependency "rspec", "~> 2.7"
 end
