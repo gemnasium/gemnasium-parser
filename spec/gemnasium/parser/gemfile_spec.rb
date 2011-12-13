@@ -46,4 +46,10 @@ describe Gemnasium::Parser::Gemfile do
     dependency.name.should == "rake"
     dependency.requirement.as_list.should == ["<= 0.9.2", ">= 0.8.7"]
   end
+
+  it "parses gems with options" do
+    content(%(gem "rake", ">= 0.8.7", :require => false))
+    dependency.name.should == "rake"
+    dependency.requirement.should == ">= 0.8.7"
+  end
 end
