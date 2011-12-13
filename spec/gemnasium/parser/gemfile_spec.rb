@@ -60,12 +60,27 @@ describe Gemnasium::Parser::Gemfile do
   it "listens for gemspecs" do
     content(%(gemspec))
     gemfile.should be_gemspec
-    gemfile.gemspec.should == true
+    gemfile.gemspec.should == "*.gemspec"
 
     reset
 
     content(%(gem "rake"))
     gemfile.should_not be_gemspec
     gemfile.gemspec.should be_nil
+  end
+
+  it "parses gemspecs with a name option" do
+    content(%(gemspec :name => "gemnasium-parser"))
+    gemfile.gemspec.should == "gemnasium-parser.gemspec"
+  end
+
+  it "parses gemspecs with a path option" do
+    content(%(gemspec :path => "lib/gemnasium"))
+    gemfile.gemspec.should == "lib/gemnasium/*.gemspec"
+  end
+
+  it "parses gemspecs with name and path options" do
+    content(%(gemspec :name => "parser", :path => "lib/gemnasium"))
+    gemfile.gemspec.should == "lib/gemnasium/parser.gemspec"
   end
 end

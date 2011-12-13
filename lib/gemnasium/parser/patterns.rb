@@ -18,9 +18,9 @@ module Gemnasium
       PAIR = /(?:(#{KEY})\s*=>\s*(#{VALUE})|(\w+):\s+(#{VALUE}))/
       OPTIONS = /#{PAIR}(?:\s*,\s*#{PAIR})*/
 
-      GEM_CALL = /^\s*gem\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*(?<q2>["'])(?<req1>#{REQUIREMENT})\k<q2>(?:\s*,\s*(?<q3>["'])(?<req2>#{REQUIREMENT})\k<q3>)?)?(?:\s*,\s*(?<opts>#{OPTIONS})\s*)?$/
+      GEM_CALL = /^\s*gem\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*(?<q2>["'])(?<req1>#{REQUIREMENT})\k<q2>(?:\s*,\s*(?<q3>["'])(?<req2>#{REQUIREMENT})\k<q3>)?)?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*$/
 
-      GEMSPEC_CALL = /^\s*gemspec\s*$/
+      GEMSPEC_CALL = /^\s*gemspec(?:\s+(?<opts>#{OPTIONS}))?\s*$/
 
       def self.options(string)
         return {} unless string
