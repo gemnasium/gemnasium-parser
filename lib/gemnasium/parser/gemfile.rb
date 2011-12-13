@@ -11,14 +11,32 @@ module Gemnasium
       end
 
       def dependencies
-        [].tap do |dependencies|
-          content.scan(Gemnasium::Parser::Patterns::GEM_CALL) do
-            match = Regexp.last_match
-            requirements = [match[:requirement_1], match[:requirement_2]].compact
-            dependencies << Bundler::Dependency.new(match[:name], requirements)
+        @dependencies ||= [].tap do |deps|
+          gem_matches.each do |match|
+            name = match[:name]
+            reqs = [match[:req1], match[:req2]].compact
+            opts = Gemnasium::Parser::Patterns.options(match[:opts])
+            deps << Bundler::Dependency.new(name, reqs, opts)
           end
         end
       end
+
+      private
+        def gem_matches
+          @gem_matches ||= matches(Gemnasium::Parser::Patterns::GEM_CALL)
+        end
+
+        def gemspec_matches
+          @gemspec_matches ||= matches(Gemnasium::Parser::Patterns::GEMSPEC_CALL)
+        end
+
+        def matches(pattern)
+          [].tap{|m| content.scan(pattern){ m << Regexp.last_match } }
+        end
+
+        def bundler
+          @bundler ||= Bundler::Dsl.new
+        end
     end
   end
 end
