@@ -21,6 +21,15 @@ module Gemnasium
         end
       end
 
+      def gemspec
+        return @gemspec if defined?(@gemspec)
+        @gemspec = !gemspec_matches.empty?
+      end
+
+      def gemspec?
+        !!gemspec
+      end
+
       private
         def gem_matches
           @gem_matches ||= matches(Gemnasium::Parser::Patterns::GEM_CALL)

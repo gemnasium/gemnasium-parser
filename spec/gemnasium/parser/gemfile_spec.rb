@@ -52,4 +52,10 @@ describe Gemnasium::Parser::Gemfile do
     dependency.name.should == "rake"
     dependency.requirement.should == ">= 0.8.7"
   end
+
+  it "listens for gemspecs" do
+    content(%(gemspec))
+    gemfile.should be_gemspec
+    gemfile.gemspec.should == true
+  end
 end

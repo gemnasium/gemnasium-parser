@@ -20,6 +20,8 @@ module Gemnasium
 
       GEM_CALL = /^\s*gem\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*(?<q2>["'])(?<req1>#{REQUIREMENT})\k<q2>(?:\s*,\s*(?<q3>["'])(?<req2>#{REQUIREMENT})\k<q3>)?)?(?:\s*,\s*(?<opts>#{OPTIONS})\s*)?$/
 
+      GEMSPEC_CALL = /^\s*gemspec\s*$/
+
       def self.options(string)
         return {} unless string
         hash, raw = {}, Hash[*string.match(OPTIONS).captures.compact]
