@@ -23,7 +23,7 @@ module Gemnasium
 
       def gemspec
         return @gemspec if defined?(@gemspec)
-        @gemspec = !gemspec_matches.empty?
+        @gemspec = !gemspec_matches.empty? || nil
       end
 
       def gemspec?

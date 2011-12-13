@@ -18,6 +18,10 @@ describe Gemnasium::Parser::Gemfile do
     dependencies.first
   end
 
+  def reset
+    @content = @gemfile = @dependencies = nil
+  end
+
   it "parses double quotes" do
     content(%(gem "rake", ">= 0.8.7"))
     dependency.name.should == "rake"
@@ -57,5 +61,11 @@ describe Gemnasium::Parser::Gemfile do
     content(%(gemspec))
     gemfile.should be_gemspec
     gemfile.gemspec.should == true
+
+    reset
+
+    content(%(gem "rake"))
+    gemfile.should_not be_gemspec
+    gemfile.gemspec.should be_nil
   end
 end
