@@ -126,4 +126,15 @@ describe Gemnasium::Parser::Gemfile do
     EOF
     dependency.groups.should == [:development, :test]
   end
+
+  it "ignores h4x" do
+    path = File.expand_path("../h4x.txt", __FILE__)
+    content(%(gem "h4x", :require => "\#{`touch #{path}`}"))
+    dependencies.size.should == 0
+    begin
+      File.should_not exist(path)
+    ensure
+      FileUtils.rm_f(path)
+    end
+  end
 end
