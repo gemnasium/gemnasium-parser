@@ -23,6 +23,10 @@ module Gemnasium
       SYMBOLS = /#{SYMBOL}(\s*,\s*#{SYMBOL})*/
       GROUP_CALL = /^(?<i1>\s*)group\s+(?<grps>#{SYMBOLS})\s+do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
 
+      GIT_CALL = /^(?<i1>\s*)git\s+.*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
+
+      PATH_CALL = /^(?<i1>\s*)path\s+.*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
+
       GEMSPEC_CALL = /^\s*gemspec(?:\s+(?<opts>#{OPTIONS}))?\s*$/
 
       def self.options(string)

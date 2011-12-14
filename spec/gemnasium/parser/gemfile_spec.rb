@@ -147,4 +147,22 @@ describe Gemnasium::Parser::Gemfile do
     content(%(gem "rails", :path => "vendor/rails"))
     dependencies.size.should == 0
   end
+
+  it "ignores gems in a git block" do
+    content(<<-EOF)
+      git "https://github.com/rails/rails.git" do
+        gem "rails"
+      end
+    EOF
+    dependencies.size.should == 0
+  end
+
+  it "ignores gems in a path block" do
+    content(<<-EOF)
+      path "vendor/rails" do
+        gem "rails"
+      end
+    EOF
+    dependencies.size.should == 0
+  end
 end

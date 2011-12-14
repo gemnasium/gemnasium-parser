@@ -43,7 +43,7 @@ module Gemnasium
 
         def dependency(match)
           opts = Patterns.options(match["opts"])
-          return nil if opts["git"] || opts["path"]
+          return nil if exclude?(match, opts)
           name = match["name"]
           reqs = [match["req1"], match["req2"]].compact
           opts["group"] ||= groups(match)
@@ -61,6 +61,34 @@ module Gemnasium
 
         def group_matches
           @group_matches ||= matches(Patterns::GROUP_CALL)
+        end
+
+        def exclude?(match, opts)
+          git?(match, opts) || path?(match, opts)
+        end
+
+        def git?(match, opts)
+          opts["git"] || in_git_block?(match)
+        end
+
+        def in_git_block?(match)
+          git_matches.any?{|m| in_block?(match, m) }
+        end
+
+        def git_matches
+          @git_matches ||= matches(Patterns::GIT_CALL)
+        end
+
+        def path?(match, opts)
+          opts["path"] || in_path_block?(match)
+        end
+
+        def in_path_block?(match)
+          path_matches.any?{|m| in_block?(match, m) }
+        end
+
+        def path_matches
+          @path_matches ||= matches(Patterns::PATH_CALL)
         end
 
         def gemspec_match
