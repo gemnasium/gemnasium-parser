@@ -95,10 +95,6 @@ module Gemnasium
           return @gemspec_match if defined?(@gemspec_match)
           @gemspec_match = content.match(Patterns::GEMSPEC_CALL)
         end
-
-        def bundler
-          @bundler ||= Bundler::Dsl.new
-        end
     end
   end
 end
