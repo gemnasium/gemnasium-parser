@@ -50,12 +50,13 @@ module Gemnasium
           Bundler::Dependency.new(name, reqs, opts)
         end
 
-        def groups(gem_match)
-          call = gem_match.begin(0)
-          match = group_matches.detect do |group_match|
-            (group_match.begin(:blk)..group_match.end(:blk)).cover?(call)
-          end
-          match && Patterns.values(match[:grps])
+        def groups(match)
+          group = group_matches.detect{|m| in_block?(match, m) }
+          group && Patterns.values(group[:grps])
+        end
+
+        def in_block?(inner, outer)
+          outer.begin(:blk) <= inner.begin(0) && outer.end(:blk) >= inner.end(0)
         end
 
         def group_matches
