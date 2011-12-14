@@ -2,7 +2,11 @@ require "spec_helper"
 
 describe Gemnasium::Parser::Gemspec do
   def content(string)
-    @content = string.gsub(/^\s+/, "")
+    @content ||= begin
+      indent = string.scan(/^[ \t]*(?=\S)/)
+      n = indent ? indent.size : 0
+      string.gsub(/^[ \t]{#{n}}/, "")
+    end
   end
 
   def gemspec
