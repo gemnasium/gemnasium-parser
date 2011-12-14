@@ -95,6 +95,26 @@ describe Gemnasium::Parser::Gemspec do
     dependency.requirement.as_list.should == ["<= 0.9.2", ">= 0.8.7"]
   end
 
+  it "parses runtime gems" do
+    content(<<-EOF)
+      Gem::Specification.new do |gem|
+        gem.add_dependency "rake"
+        gem.add_runtime_dependency "rails"
+      end
+    EOF
+    dependencies[0].type.should == :runtime
+    dependencies[1].type.should == :runtime
+  end
+
+  it "parses dependency gems" do
+    content(<<-EOF)
+      Gem::Specification.new do |gem|
+        gem.add_development_dependency "rake"
+      end
+    EOF
+    dependency.type.should == :development
+  end
+
   it "records dependency line numbers" do
     content(<<-EOF)
       Gem::Specification.new do |gem|

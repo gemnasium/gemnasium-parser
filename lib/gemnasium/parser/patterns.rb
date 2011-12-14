@@ -31,7 +31,7 @@ module Gemnasium
 
       GEMSPEC_CALL = /^\s*gemspec(?:\s+(?<opts>#{OPTIONS}))?\s*$/
 
-      RUNTIME_CALL = /^\s*\w+\.add(?:_runtime)?_dependency\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENTS})?\s*$/
+      RUNTIME_CALL = /^\s*\w+\.add(?<type>_runtime|_development)?_dependency\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENTS})?\s*$/
 
       def self.options(string)
         {}.tap do |hash|

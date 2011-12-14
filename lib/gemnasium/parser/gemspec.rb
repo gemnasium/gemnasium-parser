@@ -27,7 +27,8 @@ module Gemnasium
 
         def dependency(match)
           name, reqs = match["name"], [match["req1"], match["req2"]].compact
-          Bundler::Dependency.new(name, reqs).tap do |dep|
+          type = match["type"] =~ /development/ ? :development : :runtime
+          Bundler::Dependency.new(name, reqs, "type" => type).tap do |dep|
             line = content.slice(0, match.begin(0)).count("\n") + 1
             dep.instance_variable_set(:@line, line)
           end
