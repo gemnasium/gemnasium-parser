@@ -137,4 +137,9 @@ describe Gemnasium::Parser::Gemfile do
       FileUtils.rm_f(path)
     end
   end
+
+  it "ignores gems with a git option" do
+    content(%(gem "rails", :git => "https://github.com/rails/rails.git"))
+    dependencies.size.should == 0
+  end
 end

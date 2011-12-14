@@ -11,13 +11,17 @@ module Gemnasium
       end
 
       def dependencies
-        @dependencies ||= gem_matches.map do |match|
-          name = match["name"]
-          reqs = [match["req1"], match["req2"]].compact
-          opts = Patterns.options(match["opts"])
-          grps = groups(match)
-          opts["group"] = grps if grps
-          Bundler::Dependency.new(name, reqs, opts)
+        @dependencies ||= [].tap do |deps|
+          gem_matches.each do |match|
+            opts = Patterns.options(match["opts"])
+            unless opts["git"]
+              name = match["name"]
+              reqs = [match["req1"], match["req2"]].compact
+              grps = groups(match)
+              opts["group"] = grps if grps
+              deps << Bundler::Dependency.new(name, reqs, opts)
+            end
+          end
         end
       end
 
