@@ -23,19 +23,25 @@ module Gemnasium
       GEMSPEC_CALL = /^\s*gemspec(?:\s+(?<opts>#{OPTIONS}))?\s*$/
 
       def self.options(string)
-        return {} unless string
-        hash, raw = {}, Hash[*string.match(OPTIONS).captures.compact]
-        raw.each do |key, value|
-          new_key = key.tr(%(:"'), "")
-          new_value = case value
-          when BOOLEAN then value == "true"
-          when NIL then nil
-          when SYMBOL then value.tr(%(:"'), "").to_sym
-          when STRING then value.tr(%("'), "")
-          end
-          hash[new_key] = new_value
+        {}.tap do |hash|
+          return hash unless string
+          pairs = Hash[*string.match(OPTIONS).captures.compact]
+          pairs.each{|k,v| hash[key(k)] = value(v) }
         end
-        hash
+      end
+
+      def self.key(string)
+        string.tr(%(:"'), "")
+      end
+
+      def self.value(string)
+        case string
+        when NIL then nil
+        when BOOLEAN then string == "true"
+        when ARRAY then string.tr("[]", "").split(/\s*,\s*/).map{|e| value(e) }
+        when SYMBOL then string.tr(%(:"'), "").to_sym
+        when STRING then string.tr(%("'), "")
+        end
       end
     end
   end

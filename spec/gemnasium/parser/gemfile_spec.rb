@@ -89,4 +89,17 @@ describe Gemnasium::Parser::Gemfile do
     content(%(gem "rake", :type => :development))
     dependency.type.should == :development
   end
+
+  it "parses gems of a group" do
+    content(%(gem "rake"))
+    dependency.groups.should == [:default]
+    reset
+    content(%(gem "rake", :group => :development))
+    dependency.groups.should == [:development]
+  end
+
+  it "parses gems of multiple groups" do
+    content(%(gem "rake", :group => [:development, :test]))
+    dependency.groups.should == [:development, :test]
+  end
 end
