@@ -44,9 +44,8 @@ module Gemnasium
         def dependency(match)
           opts = Patterns.options(match["opts"])
           return nil if exclude?(match, opts)
-          name = match["name"]
-          reqs = [match["req1"], match["req2"]].compact
-          opts["group"] ||= groups(match)
+          clean!(match, opts)
+          name, reqs = match["name"], [match["req1"], match["req2"]].compact
           Bundler::Dependency.new(name, reqs, opts)
         end
 
@@ -89,6 +88,10 @@ module Gemnasium
 
         def path_matches
           @path_matches ||= matches(Patterns::PATH_CALL)
+        end
+
+        def clean!(match, opts)
+          opts["group"] ||= groups(match)
         end
 
         def gemspec_match
