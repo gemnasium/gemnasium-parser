@@ -8,7 +8,7 @@ module Gemnasium
       REQUIREMENT = /\s*(?:#{MATCHER}\s*)?#{VERSION}\s*/
 
       KEY = /(?::\w+|:?"\w+"|:?'\w+')/
-      SYMBOL = /(?::\w+|:"[^"#]+"|'[^']+')/
+      SYMBOL = /(?::\w+|:"[^"#]+"|:'[^']+')/
       STRING = /(?:"[^"#]*"|'[^']*')/
       BOOLEAN = /(?:true|false)/
       NIL = /nil/
@@ -26,7 +26,7 @@ module Gemnasium
         return {} unless string
         hash, raw = {}, Hash[*string.match(OPTIONS).captures.compact]
         raw.each do |key, value|
-          new_key = key.tr(%(:"'), "").to_sym
+          new_key = key.tr(%(:"'), "")
           new_value = case value
           when BOOLEAN then value == "true"
           when NIL then nil

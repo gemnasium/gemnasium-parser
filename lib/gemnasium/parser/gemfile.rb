@@ -12,18 +12,18 @@ module Gemnasium
 
       def dependencies
         @dependencies ||= gem_matches.map do |match|
-          name = match[:name]
-          reqs = [match[:req1], match[:req2]].compact
-          opts = Gemnasium::Parser::Patterns.options(match[:opts])
+          name = match["name"]
+          reqs = [match["req1"], match["req2"]].compact
+          opts = Patterns.options(match["opts"])
           Bundler::Dependency.new(name, reqs, opts)
         end
       end
 
       def gemspec
         @gemspec = if gemspec_match
-          opts = Gemnasium::Parser::Patterns.options(gemspec_match[:opts])
-          path = opts[:path]
-          name = opts[:name] || "*"
+          opts = Patterns.options(gemspec_match["opts"])
+          path = opts["path"]
+          name = opts["name"] || "*"
           File.join(*[path, "#{name}.gemspec"].compact)
         end
       end
