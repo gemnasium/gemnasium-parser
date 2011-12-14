@@ -61,9 +61,7 @@ describe Gemnasium::Parser::Gemfile do
     content(%(gemspec))
     gemfile.should be_gemspec
     gemfile.gemspec.should == "*.gemspec"
-
     reset
-
     content(%(gem "rake"))
     gemfile.should_not be_gemspec
     gemfile.gemspec.should be_nil
@@ -82,5 +80,13 @@ describe Gemnasium::Parser::Gemfile do
   it "parses gemspecs with name and path options" do
     content(%(gemspec :name => "parser", :path => "lib/gemnasium"))
     gemfile.gemspec.should == "lib/gemnasium/parser.gemspec"
+  end
+
+  it "parses gems of a type" do
+    content(%(gem "rake"))
+    dependency.type.should == :runtime
+    reset
+    content(%(gem "rake", :type => :development))
+    dependency.type.should == :development
   end
 end
