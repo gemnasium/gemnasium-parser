@@ -13,14 +13,8 @@ module Gemnasium
       def dependencies
         @dependencies ||= [].tap do |deps|
           gem_matches.each do |match|
-            opts = Patterns.options(match["opts"])
-            unless opts["git"] || opts["path"]
-              name = match["name"]
-              reqs = [match["req1"], match["req2"]].compact
-              grps = groups(match)
-              opts["group"] = grps if grps
-              deps << Bundler::Dependency.new(name, reqs, opts)
-            end
+            dep = dependency(match)
+            deps << dep if dep
           end
         end
       end
@@ -43,6 +37,19 @@ module Gemnasium
           @gem_matches ||= matches(Patterns::GEM_CALL)
         end
 
+        def matches(pattern)
+          [].tap{|m| content.scan(pattern){ m << Regexp.last_match } }
+        end
+
+        def dependency(match)
+          opts = Patterns.options(match["opts"])
+          return nil if opts["git"] || opts["path"]
+          name = match["name"]
+          reqs = [match["req1"], match["req2"]].compact
+          opts["group"] ||= groups(match)
+          Bundler::Dependency.new(name, reqs, opts)
+        end
+
         def groups(gem_match)
           call = gem_match.begin(0)
           match = group_matches.detect do |group_match|
@@ -53,10 +60,6 @@ module Gemnasium
 
         def group_matches
           @group_matches ||= matches(Patterns::GROUP_CALL)
-        end
-
-        def matches(pattern)
-          [].tap{|m| content.scan(pattern){ m << Regexp.last_match } }
         end
 
         def gemspec_match
