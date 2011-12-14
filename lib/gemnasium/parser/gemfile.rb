@@ -15,6 +15,8 @@ module Gemnasium
           name = match["name"]
           reqs = [match["req1"], match["req2"]].compact
           opts = Patterns.options(match["opts"])
+          grps = groups(match)
+          opts["group"] = grps if grps
           Bundler::Dependency.new(name, reqs, opts)
         end
       end
@@ -34,11 +36,23 @@ module Gemnasium
 
       private
         def gem_matches
-          @gem_matches ||= [].tap do |matches|
-            content.scan(Patterns::GEM_CALL) do
-              matches << Regexp.last_match
-            end
+          @gem_matches ||= matches(Patterns::GEM_CALL)
+        end
+
+        def groups(gem_match)
+          call = gem_match.begin(0)
+          match = group_matches.detect do |group_match|
+            (group_match.begin(:blk)..group_match.end(:blk)).cover?(call)
           end
+          match && Patterns.value(match[:grp1])
+        end
+
+        def group_matches
+          @group_matches ||= matches(Patterns::GROUP_CALL)
+        end
+
+        def matches(pattern)
+          [].tap{|m| content.scan(pattern){ m << Regexp.last_match } }
         end
 
         def gemspec_match

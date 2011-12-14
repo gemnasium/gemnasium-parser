@@ -102,4 +102,19 @@ describe Gemnasium::Parser::Gemfile do
     content(%(gem "rake", :group => [:development, :test]))
     dependency.groups.should == [:development, :test]
   end
+
+  it "parses gems in a group" do
+    content(<<-EOF)
+      gem "rake"
+      group :production do
+        gem "pg"
+      end
+      group :development do
+        gem "sqlite3"
+      end
+    EOF
+    dependencies[0].groups.should == [:default]
+    dependencies[1].groups.should == [:production]
+    dependencies[2].groups.should == [:development]
+  end
 end
