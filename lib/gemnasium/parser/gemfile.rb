@@ -44,7 +44,7 @@ module Gemnasium
           match = group_matches.detect do |group_match|
             (group_match.begin(:blk)..group_match.end(:blk)).cover?(call)
           end
-          match && Patterns.value(match[:grp1])
+          match && Patterns.values(match[:grps])
         end
 
         def group_matches

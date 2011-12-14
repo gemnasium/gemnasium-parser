@@ -117,4 +117,13 @@ describe Gemnasium::Parser::Gemfile do
     dependencies[1].groups.should == [:production]
     dependencies[2].groups.should == [:development]
   end
+
+  it "parses gems in multiple groups" do
+    content(<<-EOF)
+      group :development, :test do
+        gem "sqlite3"
+      end
+    EOF
+    dependency.groups.should == [:development, :test]
+  end
 end
