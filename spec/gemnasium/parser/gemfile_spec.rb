@@ -178,4 +178,29 @@ describe Gemnasium::Parser::Gemfile do
     dependencies[0].instance_variable_get(:@line).should == 1
     dependencies[1].instance_variable_get(:@line).should == 2
   end
+
+  it "maps groups to types" do
+    content(<<-EOF)
+      gem "rake"
+      gem "pg", :group => :production
+      gem "mysql2", :group => :staging
+      gem "sqlite3", :group => :development
+    EOF
+    dependencies[0].type.should == :runtime
+    dependencies[1].type.should == :runtime
+    dependencies[2].type.should == :development
+    dependencies[3].type.should == :development
+    reset
+    Gemnasium::Parser.runtime_groups << :staging
+    content(<<-EOF)
+      gem "rake"
+      gem "pg", :group => :production
+      gem "mysql2", :group => :staging
+      gem "sqlite3", :group => :development
+    EOF
+    dependencies[0].type.should == :runtime
+    dependencies[1].type.should == :runtime
+    dependencies[2].type.should == :runtime
+    dependencies[3].type.should == :development
+  end
 end

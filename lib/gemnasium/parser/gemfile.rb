@@ -95,6 +95,9 @@ module Gemnasium
 
         def clean!(match, opts)
           opts["group"] ||= groups(match)
+          groups = Array(opts["group"]).flatten.compact
+          runtime = groups.empty? || !(groups & Parser.runtime_groups).empty?
+          opts["type"] ||= runtime ? :runtime : :development
         end
 
         def gemspec_match
