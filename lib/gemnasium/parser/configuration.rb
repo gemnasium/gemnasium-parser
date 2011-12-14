@@ -4,7 +4,7 @@ module Gemnasium
       attr_writer :runtime_groups
 
       def runtime_groups
-        @runtime_groups ||= [:production]
+        @runtime_groups ||= [:default, :production]
       end
     end
   end
