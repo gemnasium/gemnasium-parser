@@ -1,4 +1,4 @@
-# Gemnasium::Parser [![Build Status](https://secure.travis-ci.org/laserlemon/gemnasium-parser.png)](http://travis-ci.org/laserlemon/gemnasium-parser)
+# Gemnasium::Parser [![Build Status](https://secure.travis-ci.org/laserlemon/gemnasium-parser.png)](http://travis-ci.org/laserlemon/gemnasium-parser) [![Dependency Status](https://gemnasium.com/laserlemon/gemnasium-parser.png)](https://gemnasium.com/laserlemon/gemnasium-parser)
 
 TODO: Write a gem description
 
