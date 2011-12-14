@@ -14,7 +14,7 @@ module Gemnasium
         @dependencies ||= [].tap do |deps|
           gem_matches.each do |match|
             opts = Patterns.options(match["opts"])
-            unless opts["git"]
+            unless opts["git"] || opts["path"]
               name = match["name"]
               reqs = [match["req1"], match["req2"]].compact
               grps = groups(match)
