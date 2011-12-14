@@ -46,7 +46,10 @@ module Gemnasium
           return nil if exclude?(match, opts)
           clean!(match, opts)
           name, reqs = match["name"], [match["req1"], match["req2"]].compact
-          Bundler::Dependency.new(name, reqs, opts)
+          Bundler::Dependency.new(name, reqs, opts).tap do |dep|
+            line = content.slice(0, match.begin(0)).count("\n") + 1
+            dep.instance_variable_set(:@line, line)
+          end
         end
 
         def groups(match)
