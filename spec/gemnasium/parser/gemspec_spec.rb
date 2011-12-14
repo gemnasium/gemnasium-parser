@@ -70,4 +70,24 @@ describe Gemnasium::Parser::Gemspec do
     dependency.name.should == "rake"
     dependency.requirement.as_list.should == ["<= 0.9.2", ">= 0.8.7"]
   end
+
+  it "parses single-element array requirement gems" do
+    content(<<-EOF)
+      Gem::Specification.new do |gem|
+        gem.add_dependency "rake", [">= 0.8.7"]
+      end
+    EOF
+    dependency.name.should == "rake"
+    dependency.requirement.should == ">= 0.8.7"
+  end
+
+  it "parses multi-element array requirement gems" do
+    content(<<-EOF)
+      Gem::Specification.new do |gem|
+        gem.add_dependency "rake", [">= 0.8.7", "<= 0.9.2"]
+      end
+    EOF
+    dependency.name.should == "rake"
+    dependency.requirement.as_list.should == ["<= 0.9.2", ">= 0.8.7"]
+  end
 end

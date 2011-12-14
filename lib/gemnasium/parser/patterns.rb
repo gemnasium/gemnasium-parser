@@ -6,6 +6,8 @@ module Gemnasium
       MATCHER = /(?:=|!=|>|<|>=|<=|~>)/
       VERSION = /[0-9]+(?:\.[a-zA-Z0-9]+)*/
       REQUIREMENT = /\s*(?:#{MATCHER}\s*)?#{VERSION}\s*/
+      REQUIREMENT_LIST = /(?<qr1>["'])(?<req1>#{REQUIREMENT})\k<qr1>(?:\s*,\s*(?<qr2>["'])(?<req2>#{REQUIREMENT})\k<qr2>)?/
+      REQUIREMENTS = /(?:#{REQUIREMENT_LIST}|\[\s*#{REQUIREMENT_LIST}\s*\])/
 
       KEY = /(?::\w+|:?"\w+"|:?'\w+')/
       SYMBOL = /(?::\w+|:"[^"#]+"|:'[^']+')/
@@ -18,7 +20,7 @@ module Gemnasium
       PAIR = /(?:(#{KEY})\s*=>\s*(#{VALUE})|(\w+):\s+(#{VALUE}))/
       OPTIONS = /#{PAIR}(?:\s*,\s*#{PAIR})*/
 
-      GEM_CALL = /^\s*gem\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*(?<q2>["'])(?<req1>#{REQUIREMENT})\k<q2>(?:\s*,\s*(?<q3>["'])(?<req2>#{REQUIREMENT})\k<q3>)?)?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*$/
+      GEM_CALL = /^\s*gem\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENT_LIST})?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*$/
 
       SYMBOLS = /#{SYMBOL}(\s*,\s*#{SYMBOL})*/
       GROUP_CALL = /^(?<i1>\s*)group\s+(?<grps>#{SYMBOLS})\s+do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
@@ -29,7 +31,7 @@ module Gemnasium
 
       GEMSPEC_CALL = /^\s*gemspec(?:\s+(?<opts>#{OPTIONS}))?\s*$/
 
-      RUNTIME_CALL = /^\s*\w+\.add(?:_runtime)?_dependency\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*(?<q2>["'])(?<req1>#{REQUIREMENT})\k<q2>(?:\s*,\s*(?<q3>["'])(?<req2>#{REQUIREMENT})\k<q3>)?)?\s*$/
+      RUNTIME_CALL = /^\s*\w+\.add(?:_runtime)?_dependency\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENTS})?\s*$/
 
       def self.options(string)
         {}.tap do |hash|
