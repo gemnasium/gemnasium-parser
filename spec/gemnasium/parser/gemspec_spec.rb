@@ -90,4 +90,15 @@ describe Gemnasium::Parser::Gemspec do
     dependency.name.should == "rake"
     dependency.requirement.as_list.should == ["<= 0.9.2", ">= 0.8.7"]
   end
+
+  it "records dependency line numbers" do
+    content(<<-EOF)
+      Gem::Specification.new do |gem|
+        gem.add_dependency "rake"
+        gem.add_dependency "rails"
+      end
+    EOF
+    dependencies[0].instance_variable_get(:@line).should == 2
+    dependencies[1].instance_variable_get(:@line).should == 3
+  end
 end
