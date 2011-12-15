@@ -125,4 +125,14 @@ describe Gemnasium::Parser::Gemspec do
     dependencies[0].instance_variable_get(:@line).should == 2
     dependencies[1].instance_variable_get(:@line).should == 3
   end
+
+  it "parses parentheses" do
+    content(<<-EOF)
+      Gem::Specification.new do |gem|
+        gem.add_dependency("rake", ">= 0.8.7")
+      end
+    EOF
+    dependency.name.should == "rake"
+    dependency.requirement.should == ">= 0.8.7"
+  end
 end
