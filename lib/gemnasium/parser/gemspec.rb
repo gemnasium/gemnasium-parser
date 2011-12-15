@@ -18,7 +18,7 @@ module Gemnasium
 
       private
         def runtime_matches
-          @runtime_matches ||= matches(Patterns::RUNTIME_CALL)
+          @runtime_matches ||= matches(Patterns::ADD_DEPENDENCY_CALL)
         end
 
         def matches(pattern)
