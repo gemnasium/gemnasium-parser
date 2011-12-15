@@ -203,4 +203,10 @@ describe Gemnasium::Parser::Gemfile do
     dependencies[2].type.should == :runtime
     dependencies[3].type.should == :development
   end
+
+  it "parses parentheses" do
+    content(%(gem("rake", ">= 0.8.7")))
+    dependency.name.should == "rake"
+    dependency.requirement.should == ">= 0.8.7"
+  end
 end

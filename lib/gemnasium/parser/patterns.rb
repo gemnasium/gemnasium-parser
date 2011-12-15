@@ -20,7 +20,7 @@ module Gemnasium
       PAIR = /(?:(#{KEY})\s*=>\s*(#{VALUE})|(\w+):\s+(#{VALUE}))/
       OPTIONS = /#{PAIR}(?:\s*,\s*#{PAIR})*/
 
-      GEM_CALL = /^\s*gem\s+(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENT_LIST})?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*$/
+      GEM_CALL = /^\s*gem\s*\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENT_LIST})?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*\)?\s*$/
 
       SYMBOLS = /#{SYMBOL}(\s*,\s*#{SYMBOL})*/
       GROUP_CALL = /^(?<i1>\s*)group\s+(?<grps>#{SYMBOLS})\s+do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
