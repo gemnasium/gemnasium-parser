@@ -122,6 +122,15 @@ describe Gemnasium::Parser::Gemfile do
     dependencies[2].groups.should == [:development]
   end
 
+  it "parses gems in a group with parentheses" do
+    content(<<-EOF)
+      group(:production) do
+        gem "pg"
+      end
+    EOF
+    dependency.groups.should == [:production]
+  end
+
   it "parses gems in multiple groups" do
     content(<<-EOF)
       group :development, :test do

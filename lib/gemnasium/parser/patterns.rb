@@ -23,7 +23,7 @@ module Gemnasium
       GEM_CALL = /^\s*gem\s*\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENT_LIST})?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*\)?\s*$/
 
       SYMBOLS = /#{SYMBOL}(\s*,\s*#{SYMBOL})*/
-      GROUP_CALL = /^(?<i1>\s*)group\s+(?<grps>#{SYMBOLS})\s+do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
+      GROUP_CALL = /^(?<i1>\s*)group\s*\(?\s*(?<grps>#{SYMBOLS})\s*\)?\s+do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
 
       GIT_CALL = /^(?<i1>\s*)git\s+.*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
 
