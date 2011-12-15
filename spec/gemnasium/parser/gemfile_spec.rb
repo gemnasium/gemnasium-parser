@@ -170,9 +170,27 @@ describe Gemnasium::Parser::Gemfile do
     dependencies.size.should == 0
   end
 
+  it "ignores gems in a git block with parentheses" do
+    content(<<-EOF)
+      git("https://github.com/rails/rails.git") do
+        gem "rails"
+      end
+    EOF
+    dependencies.size.should == 0
+  end
+
   it "ignores gems in a path block" do
     content(<<-EOF)
       path "vendor/rails" do
+        gem "rails"
+      end
+    EOF
+    dependencies.size.should == 0
+  end
+
+  it "ignores gems in a path block with parentheses" do
+    content(<<-EOF)
+      path("vendor/rails") do
         gem "rails"
       end
     EOF
