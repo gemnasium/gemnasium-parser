@@ -86,6 +86,11 @@ describe Gemnasium::Parser::Gemfile do
     gemfile.gemspec.should == "lib/gemnasium/parser.gemspec"
   end
 
+  it "parses gemspecs with parentheses" do
+    content(%(gemspec(:name => "gemnasium-parser")))
+    gemfile.should be_gemspec
+  end
+
   it "parses gems of a type" do
     content(%(gem "rake"))
     dependency.type.should == :runtime

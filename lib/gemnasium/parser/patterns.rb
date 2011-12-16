@@ -29,7 +29,7 @@ module Gemnasium
 
       PATH_CALL = /^(?<i1>\s*)path[\s\(].*?do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
 
-      GEMSPEC_CALL = /^\s*gemspec(?:\s+(?<opts>#{OPTIONS}))?\s*$/
+      GEMSPEC_CALL = /^\s*gemspec(?:\(?\s*(?<opts>#{OPTIONS}))?\s*\)?\s*$/
 
       ADD_DEPENDENCY_CALL = /^\s*\w+\.add(?<type>_runtime|_development)?_dependency\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENTS})?\s*\)?\s*$/
 
