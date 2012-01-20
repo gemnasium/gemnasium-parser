@@ -241,4 +241,10 @@ describe Gemnasium::Parser::Gemfile do
     dependency.name.should == "rake"
     dependency.requirement.should == ">= 0.8.7"
   end
+
+  it "parses inline comments" do
+    content(%(gem "rake", ">= 0.8.7" # Inline Comment))
+    dependency.name.should == "rake"
+    dependency.requirement.should == ">= 0.8.7"
+  end
 end

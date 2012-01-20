@@ -135,4 +135,14 @@ describe Gemnasium::Parser::Gemspec do
     dependency.name.should == "rake"
     dependency.requirement.should == ">= 0.8.7"
   end
+
+  it "parses gems followed by inline comments" do
+    content(<<-EOF)
+      Gem::Specification.new do |gem|
+        gem.add_dependency 'rake', '>= 0.8.7' # Inline Comment
+      end
+    EOF
+    dependency.name.should == "rake"
+    dependency.requirement.should == ">= 0.8.7"
+  end
 end
