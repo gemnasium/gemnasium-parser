@@ -19,8 +19,9 @@ module Gemnasium
       VALUE = /(?:#{BOOLEAN}|#{NIL}|#{ELEMENT}|#{ARRAY}|)/
       PAIR = /(?:(#{KEY})\s*=>\s*(#{VALUE})|(\w+):\s+(#{VALUE}))/
       OPTIONS = /#{PAIR}(?:\s*,\s*#{PAIR})*/
+      COMMENT = /(#.*)?/
 
-      GEM_CALL = /^\s*gem\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENT_LIST})?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*\)?\s*$/
+      GEM_CALL = /^\s*gem\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENT_LIST})?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*\)?\s*#{COMMENT}$/
 
       SYMBOLS = /#{SYMBOL}(\s*,\s*#{SYMBOL})*/
       GROUP_CALL = /^(?<i1>\s*)group\(?\s*(?<grps>#{SYMBOLS})\s*\)?\s+do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
@@ -31,7 +32,7 @@ module Gemnasium
 
       GEMSPEC_CALL = /^\s*gemspec(?:\(?\s*(?<opts>#{OPTIONS}))?\s*\)?\s*$/
 
-      ADD_DEPENDENCY_CALL = /^\s*\w+\.add(?<type>_runtime|_development)?_dependency\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENTS})?\s*\)?\s*$/
+      ADD_DEPENDENCY_CALL = /^\s*\w+\.add(?<type>_runtime|_development)?_dependency\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENTS})?\s*\)?\s*#{COMMENT}$/
 
       def self.options(string)
         {}.tap do |hash|
