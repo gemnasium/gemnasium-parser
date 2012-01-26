@@ -205,10 +205,11 @@ describe Gemnasium::Parser::Gemfile do
   it "records dependency line numbers" do
     content(<<-EOF)
       gem "rake"
+
       gem "rails"
     EOF
     dependencies[0].instance_variable_get(:@line).should == 1
-    dependencies[1].instance_variable_get(:@line).should == 2
+    dependencies[1].instance_variable_get(:@line).should == 3
   end
 
   it "maps groups to types" do

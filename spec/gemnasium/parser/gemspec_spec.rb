@@ -119,11 +119,12 @@ describe Gemnasium::Parser::Gemspec do
     content(<<-EOF)
       Gem::Specification.new do |gem|
         gem.add_dependency "rake"
+
         gem.add_dependency "rails"
       end
     EOF
     dependencies[0].instance_variable_get(:@line).should == 2
-    dependencies[1].instance_variable_get(:@line).should == 3
+    dependencies[1].instance_variable_get(:@line).should == 4
   end
 
   it "parses parentheses" do

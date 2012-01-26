@@ -5,9 +5,9 @@ module Gemnasium
 
       MATCHER = /(?:=|!=|>|<|>=|<=|~>)/
       VERSION = /[0-9]+(?:\.[a-zA-Z0-9]+)*/
-      REQUIREMENT = /\s*(?:#{MATCHER}\s*)?#{VERSION}\s*/
-      REQUIREMENT_LIST = /(?<qr1>["'])(?<req1>#{REQUIREMENT})\k<qr1>(?:\s*,\s*(?<qr2>["'])(?<req2>#{REQUIREMENT})\k<qr2>)?/
-      REQUIREMENTS = /(?:#{REQUIREMENT_LIST}|\[\s*#{REQUIREMENT_LIST}\s*\])/
+      REQUIREMENT = /[ \t]*(?:#{MATCHER}[ \t]*)?#{VERSION}[ \t]*/
+      REQUIREMENT_LIST = /(?<qr1>["'])(?<req1>#{REQUIREMENT})\k<qr1>(?:[ \t]*,[ \t]*(?<qr2>["'])(?<req2>#{REQUIREMENT})\k<qr2>)?/
+      REQUIREMENTS = /(?:#{REQUIREMENT_LIST}|\[[ \t]*#{REQUIREMENT_LIST}[ \t]*\])/
 
       KEY = /(?::\w+|:?"\w+"|:?'\w+')/
       SYMBOL = /(?::\w+|:"[^"#]+"|:'[^']+')/
@@ -15,24 +15,24 @@ module Gemnasium
       BOOLEAN = /(?:true|false)/
       NIL = /nil/
       ELEMENT = /(?:#{SYMBOL}|#{STRING})/
-      ARRAY = /\[(?:#{ELEMENT}(?:\s*,\s*#{ELEMENT})*)?\]/
+      ARRAY = /\[(?:#{ELEMENT}(?:[ \t]*,[ \t]*#{ELEMENT})*)?\]/
       VALUE = /(?:#{BOOLEAN}|#{NIL}|#{ELEMENT}|#{ARRAY}|)/
-      PAIR = /(?:(#{KEY})\s*=>\s*(#{VALUE})|(\w+):\s+(#{VALUE}))/
-      OPTIONS = /#{PAIR}(?:\s*,\s*#{PAIR})*/
-      COMMENT = /(#.*)?/
+      PAIR = /(?:(#{KEY})[ \t]*=>[ \t]*(#{VALUE})|(\w+):[ \t]+(#{VALUE}))/
+      OPTIONS = /#{PAIR}(?:[ \t]*,[ \t]*#{PAIR})*/
+      COMMENT = /(#[^\n]*)?/
 
-      GEM_CALL = /^\s*gem\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENT_LIST})?(?:\s*,\s*(?<opts>#{OPTIONS}))?\s*\)?\s*#{COMMENT}$/
+      GEM_CALL = /^[ \t]*gem\(?[ \t]*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:[ \t]*,[ \t]*#{REQUIREMENT_LIST})?(?:[ \t]*,[ \t]*(?<opts>#{OPTIONS}))?[ \t]*\)?[ \t]*#{COMMENT}$/
 
-      SYMBOLS = /#{SYMBOL}(\s*,\s*#{SYMBOL})*/
-      GROUP_CALL = /^(?<i1>\s*)group\(?\s*(?<grps>#{SYMBOLS})\s*\)?\s+do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
+      SYMBOLS = /#{SYMBOL}([ \t]*,[ \t]*#{SYMBOL})*/
+      GROUP_CALL = /^(?<i1>[ \t]*)group\(?[ \t]*(?<grps>#{SYMBOLS})[ \t]*\)?[ \t]+do[ \t]*?\n(?<blk>[^\n]*?)\n^\k<i1>end[ \t]*$/m
 
-      GIT_CALL = /^(?<i1>\s*)git[\s\(].*?do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
+      GIT_CALL = /^(?<i1>[ \t]*)git[ \(][^\n]*?do[ \t]*?\n(?<blk>.*?)\n^\k<i1>end[ \t]*$/m
 
-      PATH_CALL = /^(?<i1>\s*)path[\s\(].*?do\s*?\n(?<blk>.*?)\n^\k<i1>end\s*$/m
+      PATH_CALL = /^(?<i1>[ \t]*)path[ \(][^\n]*?do[ \t]*?\n(?<blk>.*?)\n^\k<i1>end[ \t]*$/m
 
-      GEMSPEC_CALL = /^\s*gemspec(?:\(?\s*(?<opts>#{OPTIONS}))?\s*\)?\s*$/
+      GEMSPEC_CALL = /^[ \t]*gemspec(?:\(?[ \t]*(?<opts>#{OPTIONS}))?[ \t]*\)?[ \t]*$/
 
-      ADD_DEPENDENCY_CALL = /^\s*\w+\.add(?<type>_runtime|_development)?_dependency\(?\s*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:\s*,\s*#{REQUIREMENTS})?\s*\)?\s*#{COMMENT}$/
+      ADD_DEPENDENCY_CALL = /^[ \t]*\w+\.add(?<type>_runtime|_development)?_dependency\(?[ \t]*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:[ \t]*,[ \t]*#{REQUIREMENTS})?[ \t]*\)?[ \t]*#{COMMENT}$/
 
       def self.options(string)
         {}.tap do |hash|
@@ -57,7 +57,7 @@ module Gemnasium
       end
 
       def self.values(string)
-        string.strip.split(/\s*,\s*/).map{|v| value(v) }
+        string.strip.split(/[ \t]*,[ \t]*/).map{|v| value(v) }
       end
     end
   end
