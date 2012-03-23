@@ -2,6 +2,7 @@ module Gemnasium
   module Parser
     module Patterns
       GEM_NAME = /[a-zA-Z0-9\-_]+/
+      QUOTED_GEM_NAME = /(?:(?<gq>["'])(?<name>#{GEM_NAME})\k<gq>|%q<(?<name>#{GEM_NAME})>)/
 
       MATCHER = /(?:=|!=|>|<|>=|<=|~>)/
       VERSION = /[0-9]+(?:\.[a-zA-Z0-9]+)*/
@@ -21,7 +22,7 @@ module Gemnasium
       OPTIONS = /#{PAIR}(?:[ \t]*,[ \t]*#{PAIR})*/
       COMMENT = /(#[^\n]*)?/
 
-      GEM_CALL = /^[ \t]*gem\(?[ \t]*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:[ \t]*,[ \t]*#{REQUIREMENT_LIST})?(?:[ \t]*,[ \t]*(?<opts>#{OPTIONS}))?[ \t]*\)?[ \t]*#{COMMENT}$/
+      GEM_CALL = /^[ \t]*gem\(?[ \t]*#{QUOTED_GEM_NAME}(?:[ \t]*,[ \t]*#{REQUIREMENT_LIST})?(?:[ \t]*,[ \t]*(?<opts>#{OPTIONS}))?[ \t]*\)?[ \t]*#{COMMENT}$/
 
       SYMBOLS = /#{SYMBOL}([ \t]*,[ \t]*#{SYMBOL})*/
       GROUP_CALL = /^(?<i1>[ \t]*)group\(?[ \t]*(?<grps>#{SYMBOLS})[ \t]*\)?[ \t]+do[ \t]*?\n(?<blk>[^\n]*?)\n^\k<i1>end[ \t]*$/m
@@ -32,7 +33,7 @@ module Gemnasium
 
       GEMSPEC_CALL = /^[ \t]*gemspec(?:\(?[ \t]*(?<opts>#{OPTIONS}))?[ \t]*\)?[ \t]*$/
 
-      ADD_DEPENDENCY_CALL = /^[ \t]*\w+\.add(?<type>_runtime|_development)?_dependency\(?[ \t]*(?<q1>["'])(?<name>#{GEM_NAME})\k<q1>(?:[ \t]*,[ \t]*#{REQUIREMENTS})?[ \t]*\)?[ \t]*#{COMMENT}$/
+      ADD_DEPENDENCY_CALL = /^[ \t]*\w+\.add(?<type>_runtime|_development)?_dependency\(?[ \t]*#{QUOTED_GEM_NAME}(?:[ \t]*,[ \t]*#{REQUIREMENTS})?[ \t]*\)?[ \t]*#{COMMENT}$/
 
       def self.options(string)
         {}.tap do |hash|

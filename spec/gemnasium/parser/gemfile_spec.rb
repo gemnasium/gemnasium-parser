@@ -248,4 +248,9 @@ describe Gemnasium::Parser::Gemfile do
     dependency.name.should == "rake"
     dependency.requirement.should == ">= 0.8.7"
   end
+
+  it "parses oddly quoted gems" do
+    content(%(gem %q<rake>))
+    dependency.name.should == "rake"
+  end
 end
