@@ -15,5 +15,5 @@ Gem::Specification.new do |gem|
   gem.version       = Gemnasium::Parser::VERSION
 
   gem.add_development_dependency "rake", ">= 0.8.7"
-  gem.add_development_dependency "rspec", "~> 2.7"
+  gem.add_development_dependency "rspec", "~> 2.4"
 end
