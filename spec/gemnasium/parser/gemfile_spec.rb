@@ -145,6 +145,28 @@ describe Gemnasium::Parser::Gemfile do
     dependency.groups.should == [:development, :test]
   end
 
+  it "parses multiple gems in a group" do
+    content(<<-EOF)
+      group :development do
+        gem "rake"
+        gem "sqlite3"
+      end
+    EOF
+    dependencies[0].groups.should == [:development]
+    dependencies[1].groups.should == [:development]
+  end
+
+  it "parses multiple gems in multiple groups" do
+    content(<<-EOF)
+      group :development, :test do
+        gem "rake"
+        gem "sqlite3"
+      end
+    EOF
+    dependencies[0].groups.should == [:development, :test]
+    dependencies[1].groups.should == [:development, :test]
+  end
+
   it "ignores h4x" do
     path = File.expand_path("../h4x.txt", __FILE__)
     content(%(gem "h4x", :require => "\#{`touch #{path}`}"))
