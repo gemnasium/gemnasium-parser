@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/gemnasium/parser/version', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.authors       = "Steve Richert"
@@ -12,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = "gemnasium-parser"
   gem.require_paths = ["lib"]
-  gem.version       = Gemnasium::Parser::VERSION
+  gem.version       = "0.1.4"
 
   gem.add_development_dependency "rake", ">= 0.8.7"
   gem.add_development_dependency "rspec", "~> 2.4"
