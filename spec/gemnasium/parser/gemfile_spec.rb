@@ -110,6 +110,9 @@ describe Gemnasium::Parser::Gemfile do
   it "parses gems of multiple groups" do
     content(%(gem "rake", :group => [:development, :test]))
     dependency.groups.should == [:development, :test]
+    reset
+    content(%(gem "rake", :groups => [:development, :test]))
+    dependency.groups.should == [:development, :test]
   end
 
   it "parses gems in a group" do
