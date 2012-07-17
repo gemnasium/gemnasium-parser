@@ -94,8 +94,11 @@ module Gemnasium
         end
 
         def clean!(match, opts)
-          opts["group"] ||= groups(match)
-          groups = Array(opts["group"]).flatten.compact
+          groups = Array(opts.delete('groups') || opts["group"])
+          groups << groups(match)
+          groups = groups.flatten.compact.uniq
+          opts["group"] = groups.any? ? groups : nil # Bundler::Dependency.new does not handle empty "group" option correctly
+
           runtime = groups.empty? || !(groups & Parser.runtime_groups).empty?
           opts["type"] ||= runtime ? :runtime : :development
         end
