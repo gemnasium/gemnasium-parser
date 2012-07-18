@@ -112,6 +112,11 @@ describe Gemnasium::Parser::Gemfile do
     dependency.groups.should == [:development, :test]
   end
 
+  it "recognizes :groups" do
+    content(%(gem "rake", :groups => [:development, :test]))
+    dependency.groups.should == [:development, :test]
+  end
+
   it "parses gems in a group" do
     content(<<-EOF)
       gem "rake"

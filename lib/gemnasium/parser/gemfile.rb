@@ -94,6 +94,7 @@ module Gemnasium
         end
 
         def clean!(match, opts)
+          opts["group"] ||= opts.delete("groups")
           opts["group"] ||= groups(match)
           groups = Array(opts["group"]).flatten.compact
           runtime = groups.empty? || !(groups & Parser.runtime_groups).empty?
