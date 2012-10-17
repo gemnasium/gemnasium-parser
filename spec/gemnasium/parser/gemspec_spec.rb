@@ -55,6 +55,16 @@ describe Gemnasium::Parser::Gemspec do
     dependencies.size.should == 0
   end
 
+  it "parses gems with a period in the name" do
+    content(<<-EOF)
+      Gem::Specification.new do |gem|
+        gem.add_dependency "pygment.rb", ">= 0.8.7"
+      end
+    EOF
+    dependency.name.should == "pygment.rb"
+    dependency.requirement.should == ">= 0.8.7"
+  end
+
   it "parses non-requirement gems" do
     content(<<-EOF)
       Gem::Specification.new do |gem|

@@ -1,7 +1,7 @@
 module Gemnasium
   module Parser
     module Patterns
-      GEM_NAME = /[a-zA-Z0-9\-_]+/
+      GEM_NAME = /[a-zA-Z0-9\-_\.]+/
       QUOTED_GEM_NAME = /(?:(?<gq>["'])(?<name>#{GEM_NAME})\k<gq>|%q<(?<name>#{GEM_NAME})>)/
 
       MATCHER = /(?:=|!=|>|<|>=|<=|~>)/
