@@ -66,11 +66,15 @@ module Gemnasium
         end
 
         def exclude?(match, opts)
-          git?(match, opts) || path?(match, opts)
+          git?(match, opts) || github?(match, opts) || path?(match, opts)
         end
 
         def git?(match, opts)
           opts["git"] || in_git_block?(match)
+        end
+
+        def github?(match, opts)
+          opts["github"]
         end
 
         def in_git_block?(match)

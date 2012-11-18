@@ -194,6 +194,11 @@ describe Gemnasium::Parser::Gemfile do
     dependencies.size.should == 0
   end
 
+  it "ignores gems with a github option" do
+    content(%(gem "rails", :github => "rails/rails"))
+    dependencies.size.should == 0
+  end
+
   it "ignores gems with a path option" do
     content(%(gem "rails", :path => "vendor/rails"))
     dependencies.size.should == 0
