@@ -1,3 +1,9 @@
+## 0.1.9 (Nov 19, 2012)
+
+Bugfixes:
+
+  - remove CR chars from content before parsing since it breaks patterns matching
+
 ## 0.1.8 (Nov 18, 2012)
 
 Bugfixes:
