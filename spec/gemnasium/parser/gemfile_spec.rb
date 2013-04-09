@@ -21,7 +21,7 @@ end
 
 RSpec::Matchers.define :have_a_dependency_with_requirement do |expected|
   match do |actual|
-    actual.dependencies.detect {|d| d.requirement == expected }
+    actual.dependencies.detect {|d| d.requirement.to_s == expected }
   end
 end
 
