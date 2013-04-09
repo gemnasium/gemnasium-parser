@@ -1,16 +1,62 @@
 require "spec_helper"
 
+RSpec::Matchers.define :have_requirement do |expected|
+  match do |actual|
+    if actual.respond_to? :requirement
+      actual.requirement == expected
+    else
+      actual == expected
+    end
+  end
+  diffable
+end
+
+RSpec::Matchers.define :have_a_dependency_with_name do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.name == expected}
+  end
+end
+
+RSpec::Matchers.define :have_a_runtime_dependency do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.type == :runtime}
+  end
+end
+
+RSpec::Matchers.define :have_a_development_dependency do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.type == :development}
+  end
+end
+
+RSpec::Matchers.define :have_a_dependency_with_requirement do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.requirement == expected }
+  end
+end
+
+RSpec::Matchers.define :have_a_dependency_with_list_of_requirements do |expected|
+  match do |actual|
+    actual.dependencies.collect {|d| d.requirement.as_list == expected}
+  end
+end
+
+RSpec::Matchers.define :be_in_the_default_group do |expected|
+  match do |actual|
+    actual.dependencies.collect {|d| d.groups.include? :default}
+  end
+end
+
 describe Gemnasium::Parser::Gemfile do
+
+  let(:gemfile) {Gemnasium::Parser::Gemfile.new(@content)}
+  let(:subject) { gemfile }
   def content(string)
     @content ||= begin
       indent = string.scan(/^[ \t]*(?=\S)/)
       n = indent ? indent.size : 0
       string.gsub(/^[ \t]{#{n}}/, "")
     end
-  end
-
-  def gemfile
-    @gemfile ||= Gemnasium::Parser::Gemfile.new(@content)
   end
 
   def dependencies
@@ -26,89 +72,96 @@ describe Gemnasium::Parser::Gemfile do
     @content = @gemfile = @dependencies = nil
   end
 
-  it "parses double quotes" do
-    content(%(gem "rake", ">= 0.8.7"))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+  context "given a gem call" do
+    context "with double quotes" do
+      before { content(%(gem "rake", ">= 0.8.7")) }
+      it {should have_a_dependency_with_name "rake"}
+      it {should have_a_dependency_with_requirement ">= 0.8.7"}
+      it {should_not be_gemspec}
+      it {should have_a_runtime_dependency}
+      it {should be_in_the_default_group}
+      its(:gemspec) {should be_nil}
+    end
+
+    context "with single quotes" do
+      before { content(%(gem 'rake', '>= 0.8.7')) }
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0.8.7"}
+    end
+
+    context "with mixed quotes" do
+      before {content(%(gem "rake', ">= 0.8.7"))}
+      it 'ignores the line' do
+        gemfile.dependencies.should be_empty
+      end
+    end
+
+    context "with a period in the gem name" do
+      before { content(%(gem "pygment.rb", ">= 0.8.7")) }
+
+      it {should have_a_dependency_with_name "pygment.rb"}
+      it {should have_a_dependency_with_requirement ">= 0.8.7"}
+    end
+
+    context "without a requirement" do
+      before {content(%(gem "rake"))}
+
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0"}
+    end
+
+    context "with multiple requirements" do
+      before {content(%(gem "rake", ">= 0.8.7", "<= 0.9.2"))}
+
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_list_of_requirements ["<= 0.9.2", ">= 0"]}
+    end
+
+    context "with options" do
+      before { content(%(gem "rake", ">= 0.8.7", :require => false)) }
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0.8.7" }
+    end
+
+    context "with a :development type option" do
+      before { content(%(gem "rake", :group => :development)) }
+      it { should have_a_development_dependency}
+    end
+
   end
 
-  it "parses single quotes" do
-    content(%(gem 'rake', '>= 0.8.7'))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
-  end
+  context 'given a gemspec call' do
 
-  it "ignores mixed quotes" do
-    content(%(gem "rake', ">= 0.8.7"))
-    dependencies.size.should == 0
-  end
+    context 'with no options' do
+      before {content(%(gemspec))}
 
-  it "parses gems with a period in the name" do
-    content(%(gem "pygment.rb", ">= 0.8.7"))
-    dependency.name.should == "pygment.rb"
-    dependency.requirement.should == ">= 0.8.7"
-  end
+      it {should be_gemspec}
+      its(:gemspec) {should == "*.gemspec"}
+    end
 
-  it "parses non-requirement gems" do
-    content(%(gem "rake"))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0"
-  end
+    context "with a name option" do
+      before {content(%(gemspec :name => "gemnasium-parser"))}
+      its(:gemspec) {should == "gemnasium-parser.gemspec"}
+    end
 
-  it "parses multi-requirement gems" do
-    content(%(gem "rake", ">= 0.8.7", "<= 0.9.2"))
-    dependency.name.should == "rake"
-    dependency.requirement.as_list.should == ["<= 0.9.2", ">= 0.8.7"]
-  end
+    context "with a path option" do
+      before {content(%(gemspec :path => "lib/gemnasium"))}
 
-  it "parses gems with options" do
-    content(%(gem "rake", ">= 0.8.7", :require => false))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
-  end
+      its(:gemspec) {should == "lib/gemnasium/*.gemspec" }
+    end
 
-  it "listens for gemspecs" do
-    content(%(gemspec))
-    gemfile.should be_gemspec
-    gemfile.gemspec.should == "*.gemspec"
-    reset
-    content(%(gem "rake"))
-    gemfile.should_not be_gemspec
-    gemfile.gemspec.should be_nil
-  end
+    context "with both name and path options" do
+      before {content(%(gemspec :name => "parser", :path => "lib/gemnasium"))}
+      its(:gemspec) {should == "lib/gemnasium/parser.gemspec" }
+    end
 
-  it "parses gemspecs with a name option" do
-    content(%(gemspec :name => "gemnasium-parser"))
-    gemfile.gemspec.should == "gemnasium-parser.gemspec"
-  end
-
-  it "parses gemspecs with a path option" do
-    content(%(gemspec :path => "lib/gemnasium"))
-    gemfile.gemspec.should == "lib/gemnasium/*.gemspec"
-  end
-
-  it "parses gemspecs with name and path options" do
-    content(%(gemspec :name => "parser", :path => "lib/gemnasium"))
-    gemfile.gemspec.should == "lib/gemnasium/parser.gemspec"
-  end
-
-  it "parses gemspecs with parentheses" do
-    content(%(gemspec(:name => "gemnasium-parser")))
-    gemfile.should be_gemspec
-  end
-
-  it "parses gems of a type" do
-    content(%(gem "rake"))
-    dependency.type.should == :runtime
-    reset
-    content(%(gem "rake", :type => :development))
-    dependency.type.should == :development
+    context "with parentheses" do
+      before {content(%(gemspec(:name => "gemnasium-parser")))}
+      it {should be_gemspec}
+    end
   end
 
   it "parses gems of a group" do
-    content(%(gem "rake"))
-    dependency.groups.should == [:default]
-    reset
     content(%(gem "rake", :group => :development))
     dependency.groups.should == [:development]
   end
@@ -261,7 +314,10 @@ describe Gemnasium::Parser::Gemfile do
     dependencies[1].type.should == :runtime
     dependencies[2].type.should == :development
     dependencies[3].type.should == :development
-    reset
+  end
+
+  context "when a custom runtime group is specified" do
+    it "maps groups to types" do
     Gemnasium::Parser.runtime_groups << :staging
     content(<<-EOF)
       gem "rake"
@@ -273,22 +329,24 @@ describe Gemnasium::Parser::Gemfile do
     dependencies[1].type.should == :runtime
     dependencies[2].type.should == :runtime
     dependencies[3].type.should == :development
+    end
   end
 
   it "parses parentheses" do
     content(%(gem("rake", ">= 0.8.7")))
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.should have_requirement ">= 0.8.7"
   end
 
   it "parses gems followed by inline comments" do
     content(%(gem "rake", ">= 0.8.7" # Comment))
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.should have_requirement ">= 0.8.7"
   end
 
   it "parses oddly quoted gems" do
     content(%(gem %q<rake>))
     dependency.name.should == "rake"
   end
+
 end
