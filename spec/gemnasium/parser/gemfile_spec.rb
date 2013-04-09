@@ -21,19 +21,26 @@ end
 
 RSpec::Matchers.define :have_a_dependency_with_requirement do |expected|
   match do |actual|
+    # binding.pry
     actual.dependencies.detect {|d| d.requirement.to_s == expected }
   end
 end
 
 RSpec::Matchers.define :have_a_dependency_with_list_of_requirements do |expected|
   match do |actual|
-    actual.dependencies.collect {|d| d.requirement.as_list == expected}
+    actual.dependencies.detect {|d| d.requirement.as_list == expected }
   end
 end
 
 RSpec::Matchers.define :be_in_the_default_group do |expected|
   match do |actual|
-    actual.dependencies.collect {|d| d.groups.include? :default}
+    actual.dependencies.detect {|d| d.groups.include? :default}
+  end
+end
+
+RSpec::Matchers.define :have_dependency_in_groups do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.groups == expected}
   end
 end
 
@@ -103,7 +110,7 @@ describe Gemnasium::Parser::Gemfile do
       before {content(%(gem "rake", ">= 0.8.7", "<= 0.9.2"))}
 
       it { should have_a_dependency_with_name "rake" }
-      it { should have_a_dependency_with_list_of_requirements ["<= 0.9.2", ">= 0"]}
+      it { should have_a_dependency_with_list_of_requirements ["<= 0.9.2", ">= 0.8.7"]}
     end
 
     context "with options" do
@@ -127,6 +134,22 @@ describe Gemnasium::Parser::Gemfile do
       before {content(%(gem "rake", ">= 0.8.7" # Comment))}
       it { should have_a_dependency_with_name "rake" }
       it { should have_a_dependency_with_requirement ">= 0.8.7" }
+    end
+
+    context "with a group specified" do
+      before { content(%(gem "rake", :group => :development)) }
+      it { should have_dependency_in_groups [:development]}
+    end
+
+    context "with multiple groups specified as a :group option" do
+      before { content(%(gem "rake", :group => [:development, :test])) }
+      it { should have_dependency_in_groups [:development, :test]}
+    end
+
+    context "with multiple groups specified as a :groups option" do
+      before { content(%(gem "rake", :groups => [:development, :test])) }
+
+      it { should have_dependency_in_groups [:development, :test]}
     end
   end
 
@@ -159,21 +182,6 @@ describe Gemnasium::Parser::Gemfile do
       before {content(%(gemspec(:name => "gemnasium-parser")))}
       it {should be_gemspec}
     end
-  end
-
-  it "parses gems of a group" do
-    content(%(gem "rake", :group => :development))
-    dependency.groups.should == [:development]
-  end
-
-  it "parses gems of multiple groups" do
-    content(%(gem "rake", :group => [:development, :test]))
-    dependency.groups.should == [:development, :test]
-  end
-
-  it "recognizes :groups" do
-    content(%(gem "rake", :groups => [:development, :test]))
-    dependency.groups.should == [:development, :test]
   end
 
   it "parses gems in a group" do
