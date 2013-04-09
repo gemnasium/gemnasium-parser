@@ -1,15 +1,5 @@
 require "spec_helper"
 
-RSpec::Matchers.define :have_requirement do |expected|
-  match do |actual|
-    if actual.respond_to? :requirement
-      actual.requirement == expected
-    else
-      actual == expected
-    end
-  end
-  diffable
-end
 
 RSpec::Matchers.define :have_a_dependency_with_name do |expected|
   match do |actual|
@@ -49,8 +39,7 @@ end
 
 describe Gemnasium::Parser::Gemfile do
 
-  let(:gemfile) {Gemnasium::Parser::Gemfile.new(@content)}
-  let(:subject) { gemfile }
+  subject(:gemfile) {Gemnasium::Parser::Gemfile.new(@content)}
   def content(string)
     @content ||= begin
       indent = string.scan(/^[ \t]*(?=\S)/)
@@ -128,6 +117,17 @@ describe Gemnasium::Parser::Gemfile do
       it { should have_a_development_dependency}
     end
 
+    context "with a parantheses" do
+      before {content(%(gem("rake", ">= 0.8.7")))}
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0.8.7" }
+    end
+
+    context "with inline comments" do
+      before {content(%(gem "rake", ">= 0.8.7" # Comment))}
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0.8.7" }
+    end
   end
 
   context 'given a gemspec call' do
@@ -332,17 +332,8 @@ describe Gemnasium::Parser::Gemfile do
     end
   end
 
-  it "parses parentheses" do
-    content(%(gem("rake", ">= 0.8.7")))
-    dependency.name.should == "rake"
-    dependency.should have_requirement ">= 0.8.7"
-  end
 
-  it "parses gems followed by inline comments" do
-    content(%(gem "rake", ">= 0.8.7" # Comment))
-    dependency.name.should == "rake"
-    dependency.should have_requirement ">= 0.8.7"
-  end
+
 
   it "parses oddly quoted gems" do
     content(%(gem %q<rake>))
