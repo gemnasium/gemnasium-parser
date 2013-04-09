@@ -17,6 +17,10 @@ describe Gemnasium::Parser::Gemfile do
     @dependencies ||= gemfile.dependencies
   end
 
+  def ruby_version
+    gemfile.ruby_version.version
+  end
+
   def dependency
     dependencies.size.should == 1
     dependencies.first
@@ -290,5 +294,10 @@ describe Gemnasium::Parser::Gemfile do
   it "parses oddly quoted gems" do
     content(%(gem %q<rake>))
     dependency.name.should == "rake"
+  end
+
+  it "parses ruby versions" do
+    content(%(ruby '1.9.3'))
+    ruby_version.should == "1.9.3"
   end
 end

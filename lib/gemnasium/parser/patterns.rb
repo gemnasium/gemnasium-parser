@@ -3,6 +3,8 @@ module Gemnasium
     module Patterns
       GEM_NAME = /[a-zA-Z0-9\-_\.]+/
       QUOTED_GEM_NAME = /(?:(?<gq>["'])(?<name>#{GEM_NAME})\k<gq>|%q<(?<name>#{GEM_NAME})>)/
+      RB_VERSION = /\d\.\d\.\d/
+      QUOTED_RUBY_VERSION = /(?:(?<gq>["'])(?<ruby_version>#{RB_VERSION})\k<gq>)/
 
       MATCHER = /(?:=|!=|>|<|>=|<=|~>)/
       VERSION = /[0-9]+(?:\.[a-zA-Z0-9]+)*/
@@ -21,6 +23,8 @@ module Gemnasium
       PAIR = /(?:(#{KEY})[ \t]*=>[ \t]*(#{VALUE})|(\w+):[ \t]+(#{VALUE}))/
       OPTIONS = /#{PAIR}(?:[ \t]*,[ \t]*#{PAIR})*/
       COMMENT = /(#[^\n]*)?/
+
+      RUBY_CALL = /\A\s*ruby\s*#{QUOTED_RUBY_VERSION}(?:\s*?(?<opts>#{OPTIONS}))?/
 
       GEM_CALL = /^[ \t]*gem\(?[ \t]*#{QUOTED_GEM_NAME}(?:[ \t]*,[ \t]*#{REQUIREMENT_LIST})?(?:[ \t]*,[ \t]*(?<opts>#{OPTIONS}))?[ \t]*\)?[ \t]*#{COMMENT}$/
 
