@@ -94,21 +94,18 @@ describe Gemnasium::Parser::Gemfile do
 
     context "with a period in the gem name" do
       before { content(%(gem "pygment.rb", ">= 0.8.7")) }
-
       it {should have_a_dependency_with_name "pygment.rb"}
       it {should have_a_dependency_with_requirement ">= 0.8.7"}
     end
 
     context "without a requirement" do
       before {content(%(gem "rake"))}
-
       it { should have_a_dependency_with_name "rake" }
       it { should have_a_dependency_with_requirement ">= 0"}
     end
 
     context "with multiple requirements" do
       before {content(%(gem "rake", ">= 0.8.7", "<= 0.9.2"))}
-
       it { should have_a_dependency_with_name "rake" }
       it { should have_a_dependency_with_list_of_requirements ["<= 0.9.2", ">= 0.8.7"]}
     end
@@ -148,7 +145,45 @@ describe Gemnasium::Parser::Gemfile do
 
     context "with multiple groups specified as a :groups option" do
       before { content(%(gem "rake", :groups => [:development, :test])) }
+      it { should have_dependency_in_groups [:development, :test]}
+    end
 
+    context "within a group call" do
+      before do
+        content(<<-EOF)
+          gem "rake"
+          group :production do
+            gem "pg"
+          end
+          group :development do
+            gem "sqlite3"
+          end
+        EOF
+      end
+      it { should have_dependency_in_groups [:default]}
+      it { should have_dependency_in_groups [:development]}
+      it { should have_dependency_in_groups [:production]}
+    end
+
+    context "within a group call with parentheses" do
+      before do
+        content(<<-EOF)
+          group(:production) do
+            gem "pg"
+          end
+        EOF
+      end
+      it { should have_dependency_in_groups [:production]}
+    end
+
+    context "within a multiple group call" do
+      before do
+        content(<<-EOF)
+          group :development, :test do
+            gem "sqlite3"
+          end
+        EOF
+      end
       it { should have_dependency_in_groups [:development, :test]}
     end
   end
@@ -157,7 +192,6 @@ describe Gemnasium::Parser::Gemfile do
 
     context 'with no options' do
       before {content(%(gemspec))}
-
       it {should be_gemspec}
       its(:gemspec) {should == "*.gemspec"}
     end
@@ -169,7 +203,6 @@ describe Gemnasium::Parser::Gemfile do
 
     context "with a path option" do
       before {content(%(gemspec :path => "lib/gemnasium"))}
-
       its(:gemspec) {should == "lib/gemnasium/*.gemspec" }
     end
 
@@ -184,38 +217,7 @@ describe Gemnasium::Parser::Gemfile do
     end
   end
 
-  it "parses gems in a group" do
-    content(<<-EOF)
-      gem "rake"
-      group :production do
-        gem "pg"
-      end
-      group :development do
-        gem "sqlite3"
-      end
-    EOF
-    dependencies[0].groups.should == [:default]
-    dependencies[1].groups.should == [:production]
-    dependencies[2].groups.should == [:development]
-  end
 
-  it "parses gems in a group with parentheses" do
-    content(<<-EOF)
-      group(:production) do
-        gem "pg"
-      end
-    EOF
-    dependency.groups.should == [:production]
-  end
-
-  it "parses gems in multiple groups" do
-    content(<<-EOF)
-      group :development, :test do
-        gem "sqlite3"
-      end
-    EOF
-    dependency.groups.should == [:development, :test]
-  end
 
   it "parses multiple gems in a group" do
     content(<<-EOF)
