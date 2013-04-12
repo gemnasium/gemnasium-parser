@@ -21,7 +21,6 @@ end
 
 RSpec::Matchers.define :have_a_dependency_with_requirement do |expected|
   match do |actual|
-    # binding.pry
     actual.dependencies.detect {|d| d.requirement.to_s == expected }
   end
 end
@@ -41,6 +40,12 @@ end
 RSpec::Matchers.define :have_dependency_in_groups do |expected|
   match do |actual|
     actual.dependencies.detect {|d| d.groups == expected}
+  end
+end
+
+RSpec::Matchers.define :have_dependencies_in_groups do |expected|
+  match do |actual|
+    actual.dependencies.collect {|d| d.groups }.flatten.uniq == expected
   end
 end
 
@@ -186,6 +191,65 @@ describe Gemnasium::Parser::Gemfile do
       end
       it { should have_dependency_in_groups [:development, :test]}
     end
+
+    context "with a git option" do
+      before {content(%(gem "rails", :git => "https://github.com/rails/rails.git"))}
+      its(:dependencies) {should be_empty}
+    end
+
+    context "with a github option" do
+      before {content(%(gem "rails", :git => "https://github.com/rails/rails.git"))}
+      its(:dependencies) {should be_empty}
+    end
+
+    context "with a path option" do
+      before {content(%(gem "rails", :github => "rails/rails"))}
+      its(:dependencies) {should be_empty}
+    end
+
+    context "within a git block" do
+      before do
+        content(<<-EOF)
+          git "https://github.com/rails/rails.git" do
+            gem "rails"
+          end
+        EOF
+      end
+      its(:dependencies) {should be_empty}
+    end
+
+    context "within a git block with parentheses" do
+      before do
+        content(<<-EOF)
+          git("https://github.com/rails/rails.git") do
+            gem "rails"
+          end
+        EOF
+      end
+      its(:dependencies) {should be_empty}
+    end
+
+    context "within a path block" do
+      before do
+        content(<<-EOF)
+          path "vendor/rails" do
+            gem "rails"
+          end
+        EOF
+      end
+      its(:dependencies) {should be_empty}
+    end
+
+    context "with a path block with parentheses" do
+      before do
+        content(<<-EOF)
+          path("vendor/rails") do
+            gem "rails"
+          end
+        EOF
+      end
+      its(:dependencies) {should be_empty}
+    end
   end
 
   context 'given a gemspec call' do
@@ -217,30 +281,34 @@ describe Gemnasium::Parser::Gemfile do
     end
   end
 
-
-
-  it "parses multiple gems in a group" do
-    content(<<-EOF)
-      group :development do
-        gem "rake"
-        gem "sqlite3"
-      end
-    EOF
-    dependencies[0].groups.should == [:development]
-    dependencies[1].groups.should == [:development]
+  context "given multiple gems in a group" do
+    before do
+      content(<<-EOF)
+        group :development do
+          gem "rake"
+          gem "sqlite3"
+        end
+      EOF
+    end
+    it {should have(2).dependencies}
+    it {should have_dependencies_in_groups [:development]}
   end
 
-  it "parses multiple gems in multiple groups" do
-    content(<<-EOF)
-      group :development, :test do
-        gem "rake"
-        gem "sqlite3"
-      end
-    EOF
-    dependencies[0].groups.should == [:development, :test]
-    dependencies[1].groups.should == [:development, :test]
+  context "given multiple gems in multiple groups" do
+    before do
+      content(<<-EOF)
+        group :development, :test do
+          gem "rake"
+          gem "sqlite3"
+        end
+      EOF
+    end
+
+    it {should have(2).dependencies}
+    it {should have_dependencies_in_groups [:development, :test]}
   end
 
+  # This should be treated as an integration test, but we can leave it here for now.
   it "ignores h4x" do
     path = File.expand_path("../h4x.txt", __FILE__)
     content(%(gem "h4x", :require => "\#{`touch #{path}`}"))
@@ -252,56 +320,6 @@ describe Gemnasium::Parser::Gemfile do
     end
   end
 
-  it "ignores gems with a git option" do
-    content(%(gem "rails", :git => "https://github.com/rails/rails.git"))
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems with a github option" do
-    content(%(gem "rails", :github => "rails/rails"))
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems with a path option" do
-    content(%(gem "rails", :path => "vendor/rails"))
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems in a git block" do
-    content(<<-EOF)
-      git "https://github.com/rails/rails.git" do
-        gem "rails"
-      end
-    EOF
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems in a git block with parentheses" do
-    content(<<-EOF)
-      git("https://github.com/rails/rails.git") do
-        gem "rails"
-      end
-    EOF
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems in a path block" do
-    content(<<-EOF)
-      path "vendor/rails" do
-        gem "rails"
-      end
-    EOF
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems in a path block with parentheses" do
-    content(<<-EOF)
-      path("vendor/rails") do
-        gem "rails"
-      end
-    EOF
-    dependencies.size.should == 0
-  end
 
   it "records dependency line numbers" do
     content(<<-EOF)
