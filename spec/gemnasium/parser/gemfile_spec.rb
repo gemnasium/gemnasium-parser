@@ -1,16 +1,63 @@
 require "spec_helper"
 
+
+RSpec::Matchers.define :have_a_dependency_with_name do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.name == expected}
+  end
+end
+
+RSpec::Matchers.define :have_a_runtime_dependency do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.type == :runtime}
+  end
+end
+
+RSpec::Matchers.define :have_a_development_dependency do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.type == :development}
+  end
+end
+
+RSpec::Matchers.define :have_a_dependency_with_requirement do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.requirement.to_s == expected }
+  end
+end
+
+RSpec::Matchers.define :have_a_dependency_with_list_of_requirements do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.requirement.as_list == expected }
+  end
+end
+
+RSpec::Matchers.define :be_in_the_default_group do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.groups.include? :default}
+  end
+end
+
+RSpec::Matchers.define :have_dependency_in_groups do |expected|
+  match do |actual|
+    actual.dependencies.detect {|d| d.groups == expected}
+  end
+end
+
+RSpec::Matchers.define :have_dependencies_in_groups do |expected|
+  match do |actual|
+    actual.dependencies.collect {|d| d.groups }.flatten.uniq == expected
+  end
+end
+
 describe Gemnasium::Parser::Gemfile do
+
+  subject(:gemfile) {Gemnasium::Parser::Gemfile.new(@content)}
   def content(string)
     @content ||= begin
       indent = string.scan(/^[ \t]*(?=\S)/)
       n = indent ? indent.size : 0
       string.gsub(/^[ \t]{#{n}}/, "")
     end
-  end
-
-  def gemfile
-    @gemfile ||= Gemnasium::Parser::Gemfile.new(@content)
   end
 
   def dependencies
@@ -26,158 +73,242 @@ describe Gemnasium::Parser::Gemfile do
     @content = @gemfile = @dependencies = nil
   end
 
-  it "parses double quotes" do
-    content(%(gem "rake", ">= 0.8.7"))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
-  end
+  context "given a gem call" do
+    context "with double quotes" do
+      before { content(%(gem "rake", ">= 0.8.7")) }
+      it {should have_a_dependency_with_name "rake"}
+      it {should have_a_dependency_with_requirement ">= 0.8.7"}
+      it {should_not be_gemspec}
+      it {should have_a_runtime_dependency}
+      it {should be_in_the_default_group}
+      its(:gemspec) {should be_nil}
+    end
 
-  it "parses single quotes" do
-    content(%(gem 'rake', '>= 0.8.7'))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
-  end
+    context "with single quotes" do
+      before { content(%(gem 'rake', '>= 0.8.7')) }
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0.8.7"}
+    end
 
-  it "ignores mixed quotes" do
-    content(%(gem "rake', ">= 0.8.7"))
-    dependencies.size.should == 0
-  end
-
-  it "parses gems with a period in the name" do
-    content(%(gem "pygment.rb", ">= 0.8.7"))
-    dependency.name.should == "pygment.rb"
-    dependency.requirement.should == ">= 0.8.7"
-  end
-
-  it "parses non-requirement gems" do
-    content(%(gem "rake"))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0"
-  end
-
-  it "parses multi-requirement gems" do
-    content(%(gem "rake", ">= 0.8.7", "<= 0.9.2"))
-    dependency.name.should == "rake"
-    dependency.requirement.as_list.should == ["<= 0.9.2", ">= 0.8.7"]
-  end
-
-  it "parses gems with options" do
-    content(%(gem "rake", ">= 0.8.7", :require => false))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
-  end
-
-  it "listens for gemspecs" do
-    content(%(gemspec))
-    gemfile.should be_gemspec
-    gemfile.gemspec.should == "*.gemspec"
-    reset
-    content(%(gem "rake"))
-    gemfile.should_not be_gemspec
-    gemfile.gemspec.should be_nil
-  end
-
-  it "parses gemspecs with a name option" do
-    content(%(gemspec :name => "gemnasium-parser"))
-    gemfile.gemspec.should == "gemnasium-parser.gemspec"
-  end
-
-  it "parses gemspecs with a path option" do
-    content(%(gemspec :path => "lib/gemnasium"))
-    gemfile.gemspec.should == "lib/gemnasium/*.gemspec"
-  end
-
-  it "parses gemspecs with name and path options" do
-    content(%(gemspec :name => "parser", :path => "lib/gemnasium"))
-    gemfile.gemspec.should == "lib/gemnasium/parser.gemspec"
-  end
-
-  it "parses gemspecs with parentheses" do
-    content(%(gemspec(:name => "gemnasium-parser")))
-    gemfile.should be_gemspec
-  end
-
-  it "parses gems of a type" do
-    content(%(gem "rake"))
-    dependency.type.should == :runtime
-    reset
-    content(%(gem "rake", :type => :development))
-    dependency.type.should == :development
-  end
-
-  it "parses gems of a group" do
-    content(%(gem "rake"))
-    dependency.groups.should == [:default]
-    reset
-    content(%(gem "rake", :group => :development))
-    dependency.groups.should == [:development]
-  end
-
-  it "parses gems of multiple groups" do
-    content(%(gem "rake", :group => [:development, :test]))
-    dependency.groups.should == [:development, :test]
-  end
-
-  it "recognizes :groups" do
-    content(%(gem "rake", :groups => [:development, :test]))
-    dependency.groups.should == [:development, :test]
-  end
-
-  it "parses gems in a group" do
-    content(<<-EOF)
-      gem "rake"
-      group :production do
-        gem "pg"
+    context "with mixed quotes" do
+      before {content(%(gem "rake', ">= 0.8.7"))}
+      it 'ignores the line' do
+        gemfile.dependencies.should be_empty
       end
-      group :development do
-        gem "sqlite3"
+    end
+
+    context "with a period in the gem name" do
+      before { content(%(gem "pygment.rb", ">= 0.8.7")) }
+      it {should have_a_dependency_with_name "pygment.rb"}
+      it {should have_a_dependency_with_requirement ">= 0.8.7"}
+    end
+
+    context "without a requirement" do
+      before {content(%(gem "rake"))}
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0"}
+    end
+
+    context "with multiple requirements" do
+      before {content(%(gem "rake", ">= 0.8.7", "<= 0.9.2"))}
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_list_of_requirements ["<= 0.9.2", ">= 0.8.7"]}
+    end
+
+    context "with options" do
+      before { content(%(gem "rake", ">= 0.8.7", :require => false)) }
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0.8.7" }
+    end
+
+    context "with a :development type option" do
+      before { content(%(gem "rake", :group => :development)) }
+      it { should have_a_development_dependency}
+    end
+
+    context "with a parantheses" do
+      before {content(%(gem("rake", ">= 0.8.7")))}
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0.8.7" }
+    end
+
+    context "with inline comments" do
+      before {content(%(gem "rake", ">= 0.8.7" # Comment))}
+      it { should have_a_dependency_with_name "rake" }
+      it { should have_a_dependency_with_requirement ">= 0.8.7" }
+    end
+
+    context "with a group specified" do
+      before { content(%(gem "rake", :group => :development)) }
+      it { should have_dependency_in_groups [:development]}
+    end
+
+    context "with multiple groups specified as a :group option" do
+      before { content(%(gem "rake", :group => [:development, :test])) }
+      it { should have_dependency_in_groups [:development, :test]}
+    end
+
+    context "with multiple groups specified as a :groups option" do
+      before { content(%(gem "rake", :groups => [:development, :test])) }
+      it { should have_dependency_in_groups [:development, :test]}
+    end
+
+    context "within a group call" do
+      before do
+        content(<<-EOF)
+          gem "rake"
+          group :production do
+            gem "pg"
+          end
+          group :development do
+            gem "sqlite3"
+          end
+        EOF
       end
-    EOF
-    dependencies[0].groups.should == [:default]
-    dependencies[1].groups.should == [:production]
-    dependencies[2].groups.should == [:development]
+      it { should have_dependency_in_groups [:default]}
+      it { should have_dependency_in_groups [:development]}
+      it { should have_dependency_in_groups [:production]}
+    end
+
+    context "within a group call with parentheses" do
+      before do
+        content(<<-EOF)
+          group(:production) do
+            gem "pg"
+          end
+        EOF
+      end
+      it { should have_dependency_in_groups [:production]}
+    end
+
+    context "within a multiple group call" do
+      before do
+        content(<<-EOF)
+          group :development, :test do
+            gem "sqlite3"
+          end
+        EOF
+      end
+      it { should have_dependency_in_groups [:development, :test]}
+    end
+
+    context "with a git option" do
+      before {content(%(gem "rails", :git => "https://github.com/rails/rails.git"))}
+      its(:dependencies) {should be_empty}
+    end
+
+    context "with a github option" do
+      before {content(%(gem "rails", :git => "https://github.com/rails/rails.git"))}
+      its(:dependencies) {should be_empty}
+    end
+
+    context "with a path option" do
+      before {content(%(gem "rails", :github => "rails/rails"))}
+      its(:dependencies) {should be_empty}
+    end
+
+    context "within a git block" do
+      before do
+        content(<<-EOF)
+          git "https://github.com/rails/rails.git" do
+            gem "rails"
+          end
+        EOF
+      end
+      its(:dependencies) {should be_empty}
+    end
+
+    context "within a git block with parentheses" do
+      before do
+        content(<<-EOF)
+          git("https://github.com/rails/rails.git") do
+            gem "rails"
+          end
+        EOF
+      end
+      its(:dependencies) {should be_empty}
+    end
+
+    context "within a path block" do
+      before do
+        content(<<-EOF)
+          path "vendor/rails" do
+            gem "rails"
+          end
+        EOF
+      end
+      its(:dependencies) {should be_empty}
+    end
+
+    context "with a path block with parentheses" do
+      before do
+        content(<<-EOF)
+          path("vendor/rails") do
+            gem "rails"
+          end
+        EOF
+      end
+      its(:dependencies) {should be_empty}
+    end
   end
 
-  it "parses gems in a group with parentheses" do
-    content(<<-EOF)
-      group(:production) do
-        gem "pg"
-      end
-    EOF
-    dependency.groups.should == [:production]
+  context 'given a gemspec call' do
+
+    context 'with no options' do
+      before {content(%(gemspec))}
+      it {should be_gemspec}
+      its(:gemspec) {should == "*.gemspec"}
+    end
+
+    context "with a name option" do
+      before {content(%(gemspec :name => "gemnasium-parser"))}
+      its(:gemspec) {should == "gemnasium-parser.gemspec"}
+    end
+
+    context "with a path option" do
+      before {content(%(gemspec :path => "lib/gemnasium"))}
+      its(:gemspec) {should == "lib/gemnasium/*.gemspec" }
+    end
+
+    context "with both name and path options" do
+      before {content(%(gemspec :name => "parser", :path => "lib/gemnasium"))}
+      its(:gemspec) {should == "lib/gemnasium/parser.gemspec" }
+    end
+
+    context "with parentheses" do
+      before {content(%(gemspec(:name => "gemnasium-parser")))}
+      it {should be_gemspec}
+    end
   end
 
-  it "parses gems in multiple groups" do
-    content(<<-EOF)
-      group :development, :test do
-        gem "sqlite3"
-      end
-    EOF
-    dependency.groups.should == [:development, :test]
+  context "given multiple gems in a group" do
+    before do
+      content(<<-EOF)
+        group :development do
+          gem "rake"
+          gem "sqlite3"
+        end
+      EOF
+    end
+    it {should have(2).dependencies}
+    it {should have_dependencies_in_groups [:development]}
   end
 
-  it "parses multiple gems in a group" do
-    content(<<-EOF)
-      group :development do
-        gem "rake"
-        gem "sqlite3"
-      end
-    EOF
-    dependencies[0].groups.should == [:development]
-    dependencies[1].groups.should == [:development]
+  context "given multiple gems in multiple groups" do
+    before do
+      content(<<-EOF)
+        group :development, :test do
+          gem "rake"
+          gem "sqlite3"
+        end
+      EOF
+    end
+
+    it {should have(2).dependencies}
+    it {should have_dependencies_in_groups [:development, :test]}
   end
 
-  it "parses multiple gems in multiple groups" do
-    content(<<-EOF)
-      group :development, :test do
-        gem "rake"
-        gem "sqlite3"
-      end
-    EOF
-    dependencies[0].groups.should == [:development, :test]
-    dependencies[1].groups.should == [:development, :test]
-  end
-
+  # This should be treated as an integration test, but we can leave it here for now.
   it "ignores h4x" do
     path = File.expand_path("../h4x.txt", __FILE__)
     content(%(gem "h4x", :require => "\#{`touch #{path}`}"))
@@ -189,56 +320,6 @@ describe Gemnasium::Parser::Gemfile do
     end
   end
 
-  it "ignores gems with a git option" do
-    content(%(gem "rails", :git => "https://github.com/rails/rails.git"))
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems with a github option" do
-    content(%(gem "rails", :github => "rails/rails"))
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems with a path option" do
-    content(%(gem "rails", :path => "vendor/rails"))
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems in a git block" do
-    content(<<-EOF)
-      git "https://github.com/rails/rails.git" do
-        gem "rails"
-      end
-    EOF
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems in a git block with parentheses" do
-    content(<<-EOF)
-      git("https://github.com/rails/rails.git") do
-        gem "rails"
-      end
-    EOF
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems in a path block" do
-    content(<<-EOF)
-      path "vendor/rails" do
-        gem "rails"
-      end
-    EOF
-    dependencies.size.should == 0
-  end
-
-  it "ignores gems in a path block with parentheses" do
-    content(<<-EOF)
-      path("vendor/rails") do
-        gem "rails"
-      end
-    EOF
-    dependencies.size.should == 0
-  end
 
   it "records dependency line numbers" do
     content(<<-EOF)
@@ -261,7 +342,10 @@ describe Gemnasium::Parser::Gemfile do
     dependencies[1].type.should == :runtime
     dependencies[2].type.should == :development
     dependencies[3].type.should == :development
-    reset
+  end
+
+  context "when a custom runtime group is specified" do
+    it "maps groups to types" do
     Gemnasium::Parser.runtime_groups << :staging
     content(<<-EOF)
       gem "rake"
@@ -273,22 +357,15 @@ describe Gemnasium::Parser::Gemfile do
     dependencies[1].type.should == :runtime
     dependencies[2].type.should == :runtime
     dependencies[3].type.should == :development
+    end
   end
 
-  it "parses parentheses" do
-    content(%(gem("rake", ">= 0.8.7")))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
-  end
 
-  it "parses gems followed by inline comments" do
-    content(%(gem "rake", ">= 0.8.7" # Comment))
-    dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
-  end
+
 
   it "parses oddly quoted gems" do
     content(%(gem %q<rake>))
     dependency.name.should == "rake"
   end
+
 end
