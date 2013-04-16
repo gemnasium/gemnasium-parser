@@ -1,4 +1,10 @@
-# Gemnasium::Parser [![Build Status](https://secure.travis-ci.org/laserlemon/gemnasium-parser.png)](http://travis-ci.org/laserlemon/gemnasium-parser) [![Dependency Status](https://gemnasium.com/laserlemon/gemnasium-parser.png)](https://gemnasium.com/laserlemon/gemnasium-parser)
+# Gemnasium::Parser
+
+[![Gem Version](https://badge.fury.io/rb/gemnasium-parser.png)](http://badge.fury.io/rb/gemnasium-parser)
+[![Build Status](https://travis-ci.org/laserlemon/gemnasium-parser.png?branch=master)](https://travis-ci.org/laserlemon/gemnasium-parser)
+[![Dependency Status](https://gemnasium.com/laserlemon/gemnasium-parser.png)](https://gemnasium.com/laserlemon/gemnasium-parser)
+[![Code Climate](https://codeclimate.com/github/laserlemon/gemnasium-parser.png)](https://codeclimate.com/github/laserlemon/gemnasium-parser)
+[![Coverage Status](https://coveralls.io/repos/laserlemon/gemnasium-parser/badge.png?branch=master)](https://coveralls.io/r/laserlemon/gemnasium-parser)
 
 The [Gemnasium](https://gemnasium.com/) parser determines gem dependencies from gemfiles and gemspecs, without evaluating the Ruby.
 
