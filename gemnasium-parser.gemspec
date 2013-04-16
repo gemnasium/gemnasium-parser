@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.email       = "steve.richert@gmail.com"
   gem.description = "Safely parse Gemfiles and gemspecs"
   gem.summary     = gem.description
-  gem.homepage    = "https://github.com/laserlemon/gemnasium-parser"
+  gem.homepage    = "https://github.com/gemnasium/gemnasium-parser"
 
   gem.add_development_dependency "rake", ">= 0.8.7"
   gem.add_development_dependency "rspec", "~> 2.4"
