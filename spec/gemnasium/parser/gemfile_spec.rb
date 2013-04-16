@@ -29,13 +29,13 @@ describe Gemnasium::Parser::Gemfile do
   it "parses double quotes" do
     content(%(gem "rake", ">= 0.8.7"))
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "parses single quotes" do
     content(%(gem 'rake', '>= 0.8.7'))
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "ignores mixed quotes" do
@@ -52,7 +52,7 @@ describe Gemnasium::Parser::Gemfile do
   it "parses non-requirement gems" do
     content(%(gem "rake"))
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0"
+    dependency.requirement.as_list.should == [">= 0"]
   end
 
   it "parses multi-requirement gems" do
@@ -64,7 +64,7 @@ describe Gemnasium::Parser::Gemfile do
   it "parses gems with options" do
     content(%(gem "rake", ">= 0.8.7", :require => false))
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "listens for gemspecs" do
@@ -278,13 +278,13 @@ describe Gemnasium::Parser::Gemfile do
   it "parses parentheses" do
     content(%(gem("rake", ">= 0.8.7")))
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "parses gems followed by inline comments" do
     content(%(gem "rake", ">= 0.8.7" # Comment))
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "parses oddly quoted gems" do

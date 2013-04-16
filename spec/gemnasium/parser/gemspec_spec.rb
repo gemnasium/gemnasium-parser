@@ -33,7 +33,7 @@ describe Gemnasium::Parser::Gemspec do
       end
     EOF
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "parses single quotes" do
@@ -43,7 +43,7 @@ describe Gemnasium::Parser::Gemspec do
       end
     EOF
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "ignores mixed quotes" do
@@ -72,7 +72,7 @@ describe Gemnasium::Parser::Gemspec do
       end
     EOF
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0"
+    dependency.requirement.as_list.should == [">= 0"]
   end
 
   it "parses multi-requirement gems" do
@@ -92,7 +92,7 @@ describe Gemnasium::Parser::Gemspec do
       end
     EOF
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "parses multi-element array requirement gems" do
@@ -144,7 +144,7 @@ describe Gemnasium::Parser::Gemspec do
       end
     EOF
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "parses gems followed by inline comments" do
@@ -154,6 +154,6 @@ describe Gemnasium::Parser::Gemspec do
       end
     EOF
     dependency.name.should == "rake"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 end
