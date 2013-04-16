@@ -46,7 +46,7 @@ describe Gemnasium::Parser::Gemfile do
   it "parses gems with a period in the name" do
     content(%(gem "pygment.rb", ">= 0.8.7"))
     dependency.name.should == "pygment.rb"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "parses non-requirement gems" do

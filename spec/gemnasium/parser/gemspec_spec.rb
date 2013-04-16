@@ -62,7 +62,7 @@ describe Gemnasium::Parser::Gemspec do
       end
     EOF
     dependency.name.should == "pygment.rb"
-    dependency.requirement.should == ">= 0.8.7"
+    dependency.requirement.as_list.should == [">= 0.8.7"]
   end
 
   it "parses non-requirement gems" do
