@@ -28,6 +28,15 @@ module Gemnasium
         end
       end
 
+      def ruby
+        @ruby ||= begin
+          if spec = matches(Patterns::RUBY_CALL).last
+            opts = Patterns.options(spec["opts"])
+            Bundler::RubyVersion.new(spec['version'], opts['engine'], opts['engine_version'])
+          end
+        end
+      end
+
       def gemspec?
         !!gemspec
       end
