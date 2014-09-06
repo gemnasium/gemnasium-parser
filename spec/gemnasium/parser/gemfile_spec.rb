@@ -1,12 +1,14 @@
 require "spec_helper"
 
 describe Gemnasium::Parser::Gemfile do
+
+  def undent(string)
+    first_line_indent = string[/\A\s*/]
+    string.gsub(/^#{first_line_indent}/, "")
+  end
+
   def content(string)
-    @content ||= begin
-      indent = string.scan(/^[ \t]*(?=\S)/)
-      n = indent ? indent.size : 0
-      string.gsub(/^[ \t]{#{n}}/, "")
-    end
+    @content ||= undent(string)
   end
 
   def gemfile
