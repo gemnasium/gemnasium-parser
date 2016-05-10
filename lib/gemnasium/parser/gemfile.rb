@@ -19,6 +19,9 @@ module Gemnasium
         end
       end
 
+      def ruby_version
+        parse_ruby_version(ruby_matches.first) if ruby_matches
+      end
       def gemspec
         @gemspec = if gemspec_match
           opts = Patterns.options(gemspec_match["opts"])
@@ -35,6 +38,15 @@ module Gemnasium
       private
         def gem_matches
           @gem_matches ||= matches(Patterns::GEM_CALL)
+        end
+
+        def ruby_matches
+          @ruby_mathces ||= matches(Patterns::RUBY_CALL)
+        end
+
+        def parse_ruby_version(match)
+          opts = Patterns.options(match["opts"])
+          Bundler::RubyVersion.new(match["ruby_version"], opts["engine"], opts["engine_version"])
         end
 
         def matches(pattern)
