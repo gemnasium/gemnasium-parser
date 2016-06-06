@@ -43,6 +43,21 @@ describe Gemnasium::Parser::Gemfile do
     dependencies.size.should == 0
   end
 
+  it "does not barf on missing ruby specification" do
+    content(%(gem "rake"))
+    gemfile.ruby.should == nil
+  end
+
+  it "detects ruby specification" do
+    content(%(ruby "1.8.7"))
+    gemfile.ruby.should == Bundler::RubyVersion.new('1.8.7', 'ruby', '1.8.7')
+  end
+
+  it "detects ruby specification with engine and engine_version" do
+    content(%(ruby "1.8.7", :engine => "jruby", :engine_version => "1.6.7"))
+    gemfile.ruby.should == Bundler::RubyVersion.new('1.8.7', 'jruby', '1.6.7')
+  end
+
   it "parses gems with a period in the name" do
     content(%(gem "pygment.rb", ">= 0.8.7"))
     dependency.name.should == "pygment.rb"

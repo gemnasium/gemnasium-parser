@@ -35,6 +35,9 @@ module Gemnasium
 
       ADD_DEPENDENCY_CALL = /^[ \t]*\w+\.add(?<type>_runtime|_development)?_dependency\(?[ \t]*#{QUOTED_GEM_NAME}(?:[ \t]*,[ \t]*#{REQUIREMENTS})?[ \t]*\)?[ \t]*#{COMMENT}$/
 
+      QUOTED_RUBY_VERSION = /(?:(?<gq>["'])(?<version>#{VERSION})\k<gq>|%q<(?<version>#{VERSION})>)/
+      RUBY_CALL = /^[ \t]*ruby\(?[ \t]*#{QUOTED_RUBY_VERSION}(?:[ \t]*,[ \t]*(?<opts>#{OPTIONS}))?[ \t]*\)?[ \t]*#{COMMENT}$/
+
       def self.options(string)
         {}.tap do |hash|
           return hash unless string

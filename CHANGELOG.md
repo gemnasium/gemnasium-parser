@@ -1,3 +1,7 @@
+## 0.2.0 / 2013-11-09
+
+* add the ability to parse the ruby version specification
+
 ## 0.1.9 / 2012-11-19
 
 Bugfixes:
@@ -10,7 +14,7 @@ Bugfixes:
 
 * support :github option and exclude gems that use it
 * add CHANGELOG
-  
+
 ## 0.1.7 2012-10-17
 
 Bugfixes:

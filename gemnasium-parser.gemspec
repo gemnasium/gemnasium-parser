@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name    = "gemnasium-parser"
-  gem.version = "0.1.9"
+  gem.version = "0.2.0"
 
   gem.authors     = "Steve Richert"
   gem.email       = "steve.richert@gmail.com"
